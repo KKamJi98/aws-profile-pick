@@ -33,6 +33,14 @@ dev = [
     "ruff>=0.14,<0.15",
 ]
 
+# PyPI shows no way back to the source without these. The project page carried a
+# summary and nothing else: no repository, no issue tracker.
+[project.urls]
+Homepage = "https://github.com/KKamJi98/aws-profile-pick"
+Source = "https://github.com/KKamJi98/aws-profile-pick"
+Issues = "https://github.com/KKamJi98/aws-profile-pick/issues"
+Changelog = "https://github.com/KKamJi98/aws-profile-pick/releases"
+
 [project.scripts]
 awspick = "awspick.cli:main"
 
