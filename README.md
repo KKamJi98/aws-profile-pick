@@ -101,8 +101,8 @@ from any shell.
 ### From source
 
 ```bash
-git clone https://github.com/KKamJi98/aws-pick.git
-cd aws-pick
+git clone https://github.com/KKamJi98/aws-profile-pick.git
+cd aws-profile-pick
 uv venv .venv
 uv pip install -e .[dev]
 ```
@@ -226,8 +226,8 @@ Keywords match on token boundaries (`-`, `_`) so `prod` won't match `preprod`.
 |---|---|
 | `tf=tf` | Profiles containing token `tf` → group `tf` |
 | `prod=prod,production` | Multiple keywords for one group |
-| `others` | Positional marker — unmatched profiles appear here |
-| `main=*` | Catch-all wildcard — same as `others` but with custom name |
+| `others` | Positional marker - unmatched profiles appear here |
+| `main=*` | Catch-all wildcard - same as `others` but with custom name |
 
 **Display order** follows the rule order. Unmatched profiles go to the catch-all group
 (`others` by default, appended at the end if not explicitly placed).
@@ -291,8 +291,8 @@ This project uses [uv](https://github.com/astral-sh/uv) for dependency managemen
 
 ```bash
 # Clone the repository
-git clone https://github.com/KKamJi98/aws-pick.git
-cd aws-pick
+git clone https://github.com/KKamJi98/aws-profile-pick.git
+cd aws-profile-pick
 
 # Install dependencies
 uv venv .venv
