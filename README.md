@@ -107,12 +107,12 @@ awspick
 
 Apply the selected profile immediately in the current shell:
 - Installed via `uv tool install`: `eval "$(awspick)"`
-- Running the script directly: `eval "$(python3 /path/to/aws_pick.py)"`
+- Running the script directly: `eval "$(python3 /path/to/awspick.py)"`
 
 You can also invoke the launcher script directly:
 
 ```bash
-python3 /path/to/aws_pick.py
+python3 /path/to/awspick.py
 ```
 
 All prompts and logs are printed to **stderr**, while the final
@@ -128,7 +128,7 @@ function awspick_apply() {
 }
 
 function awspick_local() {
-    eval "$(python3 /your/path/to/aws_pick.py "$@")"
+    eval "$(python3 /your/path/to/awspick.py "$@")"
 }
 
 alias ap='awspick_apply'
@@ -319,8 +319,8 @@ isort .
 
 ```
 aws-pick/
-├── aws_pick.py       # Single-file launcher script
-├── aws_pick/
+├── awspick.py       # Single-file launcher script
+├── awspick/
 │   ├── __init__.py
 │   ├── cli.py          # Command-line interface
 │   ├── config.py       # AWS config file parsing

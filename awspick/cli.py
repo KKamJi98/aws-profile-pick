@@ -10,13 +10,13 @@ import logging
 import sys
 from typing import List, Optional
 
-from aws_pick.config import (
+from awspick.config import (
     display_profiles,
     get_grouped_profiles,
     read_aws_profiles,
     validate_profile_selection,
 )
-from aws_pick.shell import (
+from awspick.shell import (
     detect_shell,
     generate_export_command,
     get_current_profile,

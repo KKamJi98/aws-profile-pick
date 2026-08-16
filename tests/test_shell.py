@@ -4,7 +4,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, mock_open, patch
 
 
-from aws_pick.shell import (
+from awspick.shell import (
     BACKUP_RETENTION_COUNT,
     ShellConfig,
     backup_rc_file,
@@ -35,8 +35,8 @@ def test_shell_config():
     assert not pattern.search('# export AWS_PROFILE="old-profile"')
 
 
-@patch("aws_pick.shell.os.environ")
-@patch("aws_pick.shell.subprocess.run")
+@patch("awspick.shell.os.environ")
+@patch("awspick.shell.subprocess.run")
 def test_detect_shell_from_env(mock_run, mock_environ):
     """Test detecting shell from SHELL environment variable."""
     # Setup mock
@@ -51,9 +51,9 @@ def test_detect_shell_from_env(mock_run, mock_environ):
     mock_run.assert_not_called()
 
 
-@patch("aws_pick.shell.os.environ")
-@patch("aws_pick.shell.subprocess.run")
-@patch("aws_pick.shell.os.getppid")
+@patch("awspick.shell.os.environ")
+@patch("awspick.shell.subprocess.run")
+@patch("awspick.shell.os.getppid")
 def test_detect_shell_from_process(mock_getppid, mock_run, mock_environ):
     """Test detecting shell from parent process."""
     # Setup mocks
@@ -96,7 +96,7 @@ def test_get_shell_configs():
     assert 'set -gx AWS_PROFILE "test"' == fish_config.get_profile_line("test")
 
 
-@patch("aws_pick.shell.detect_shell")
+@patch("awspick.shell.detect_shell")
 def test_get_rc_path(mock_detect_shell):
     """Test getting RC path for different shells."""
     # Test with explicit shell name
@@ -118,8 +118,8 @@ def test_get_rc_path(mock_detect_shell):
     assert shell_config.name == "bash"
 
 
-@patch("aws_pick.shell.get_rc_path")
-@patch("aws_pick.shell.os.environ")
+@patch("awspick.shell.get_rc_path")
+@patch("awspick.shell.os.environ")
 def test_get_current_profile_from_env(mock_environ, mock_get_rc_path):
     """Test reading current profile from AWS_PROFILE env var."""
     mock_environ.get.return_value = "dev"
@@ -130,8 +130,8 @@ def test_get_current_profile_from_env(mock_environ, mock_get_rc_path):
     mock_get_rc_path.assert_not_called()
 
 
-@patch("aws_pick.shell.get_rc_path")
-@patch("aws_pick.shell.os.environ")
+@patch("awspick.shell.get_rc_path")
+@patch("awspick.shell.os.environ")
 @patch("pathlib.Path.exists", return_value=True)
 @patch(
     "builtins.open",
@@ -153,8 +153,8 @@ def test_get_current_profile_from_rc_file(
     mock_file.assert_called_once_with(rc_path, "r")
 
 
-@patch("aws_pick.shell.shutil.copy2")
-@patch("aws_pick.shell.datetime")
+@patch("awspick.shell.shutil.copy2")
+@patch("awspick.shell.datetime")
 def test_backup_rc_file(mock_datetime, mock_copy):
     """Test backing up RC file."""
     # Setup mocks
@@ -170,8 +170,8 @@ def test_backup_rc_file(mock_datetime, mock_copy):
     mock_copy.assert_called_once_with(rc_path, expected_backup)
 
 
-@patch("aws_pick.shell.shutil.copy2")
-@patch("aws_pick.shell.datetime")
+@patch("awspick.shell.shutil.copy2")
+@patch("awspick.shell.datetime")
 def test_backup_rc_file_rotates_old_backups(mock_datetime, mock_copy, tmp_path):
     """Test backup rotation keeps only BACKUP_RETENTION_COUNT files."""
     mock_datetime.datetime.now.return_value.strftime.return_value = "20250605060000"
@@ -196,8 +196,8 @@ def test_backup_rc_file_rotates_old_backups(mock_datetime, mock_copy, tmp_path):
     mock_copy.assert_called_once()
 
 
-@patch("aws_pick.shell.get_rc_path")
-@patch("aws_pick.shell.backup_rc_file")
+@patch("awspick.shell.get_rc_path")
+@patch("awspick.shell.backup_rc_file")
 @patch("pathlib.Path.exists", return_value=True)
 @patch(
     "builtins.open",
@@ -229,8 +229,8 @@ def test_update_aws_profile_bash(mock_file, mock_exists, mock_backup, mock_get_r
     assert 'export AWS_PROFILE="new-profile"' in written_content
 
 
-@patch("aws_pick.shell.get_rc_path")
-@patch("aws_pick.shell.backup_rc_file")
+@patch("awspick.shell.get_rc_path")
+@patch("awspick.shell.backup_rc_file")
 @patch("pathlib.Path.exists", return_value=True)
 @patch(
     "builtins.open",
@@ -264,7 +264,7 @@ def test_update_aws_profile_fish(mock_file, mock_exists, mock_backup, mock_get_r
     assert 'set -gx AWS_PROFILE "new-profile"' in written_content
 
 
-@patch("aws_pick.shell.get_rc_path")
+@patch("awspick.shell.get_rc_path")
 @patch("pathlib.Path.exists", return_value=True)
 @patch(
     "builtins.open",
@@ -291,7 +291,7 @@ def test_update_aws_profile_no_change(mock_file, mock_exists, mock_get_rc_path):
     handle.write.assert_not_called()
 
 
-@patch("aws_pick.shell.get_rc_path")
+@patch("awspick.shell.get_rc_path")
 def test_update_aws_profile_no_rc_file_bash(mock_get_rc_path):
     """Test when RC file doesn't exist for bash."""
     # Setup mocks
@@ -312,8 +312,8 @@ def test_update_aws_profile_no_rc_file_bash(mock_get_rc_path):
     assert backup_path is None
 
 
-@patch("aws_pick.shell.get_rc_path")
-@patch("aws_pick.shell.backup_rc_file")
+@patch("awspick.shell.get_rc_path")
+@patch("awspick.shell.backup_rc_file")
 @patch("pathlib.Path.exists")
 @patch("pathlib.Path.mkdir")
 @patch("builtins.open", new_callable=mock_open)

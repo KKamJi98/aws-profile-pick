@@ -1,5 +1,5 @@
 [project]
-name = "aws-pick"
+name = "awspick"
 version = "1.4.1"
 description = "A simple CLI tool to easily switch between AWS profiles in your shell environment"
 readme = "README.md"
@@ -35,7 +35,7 @@ dev = [
 ]
 
 [project.scripts]
-awspick = "aws_pick.cli:main"
+awspick = "awspick.cli:main"
 
 [build-system]
 requires = ["hatchling"]

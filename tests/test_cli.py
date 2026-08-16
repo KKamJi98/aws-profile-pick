@@ -4,7 +4,7 @@ import sys
 from unittest.mock import patch
 
 
-from aws_pick.cli import get_profile_selection, main
+from awspick.cli import get_profile_selection, main
 
 
 @patch("builtins.input")
@@ -98,7 +98,7 @@ def test_get_profile_selection_keyboard_interrupt(mock_input):
     mock_input.assert_called_once()
 
 
-@patch("aws_pick.cli.read_aws_profiles")
+@patch("awspick.cli.read_aws_profiles")
 def test_main_no_profiles(mock_read_profiles):
     """Test main function with no profiles."""
     # Setup mock
@@ -112,10 +112,10 @@ def test_main_no_profiles(mock_read_profiles):
     mock_read_profiles.assert_called_once()
 
 
-@patch("aws_pick.cli.read_aws_profiles")
-@patch("aws_pick.cli.display_profiles")
-@patch("aws_pick.cli.get_profile_selection")
-@patch("aws_pick.cli.get_current_profile")
+@patch("awspick.cli.read_aws_profiles")
+@patch("awspick.cli.display_profiles")
+@patch("awspick.cli.get_profile_selection")
+@patch("awspick.cli.get_current_profile")
 def test_main_cancelled_selection(
     mock_get_current_profile, mock_get_selection, mock_display, mock_read_profiles
 ):
@@ -135,14 +135,14 @@ def test_main_cancelled_selection(
     mock_get_selection.assert_called_once()
 
 
-@patch("aws_pick.cli.read_aws_profiles")
-@patch("aws_pick.cli.display_profiles")
-@patch("aws_pick.cli.get_profile_selection")
-@patch("aws_pick.cli.write_shared_profile")
-@patch("aws_pick.cli.update_aws_profile")
-@patch("aws_pick.cli.detect_shell")
+@patch("awspick.cli.read_aws_profiles")
+@patch("awspick.cli.display_profiles")
+@patch("awspick.cli.get_profile_selection")
+@patch("awspick.cli.write_shared_profile")
+@patch("awspick.cli.update_aws_profile")
+@patch("awspick.cli.detect_shell")
 @patch("builtins.print")
-@patch("aws_pick.cli.get_current_profile")
+@patch("awspick.cli.get_current_profile")
 def test_main_successful_update(
     mock_get_current_profile,
     mock_print,
@@ -175,13 +175,13 @@ def test_main_successful_update(
     assert mock_print.call_count >= 3  # At least 3 print calls
 
 
-@patch("aws_pick.cli.read_aws_profiles")
-@patch("aws_pick.cli.display_profiles")
-@patch("aws_pick.cli.get_profile_selection")
-@patch("aws_pick.cli.write_shared_profile")
-@patch("aws_pick.cli.update_aws_profile")
-@patch("aws_pick.cli.detect_shell")
-@patch("aws_pick.cli.get_current_profile")
+@patch("awspick.cli.read_aws_profiles")
+@patch("awspick.cli.display_profiles")
+@patch("awspick.cli.get_profile_selection")
+@patch("awspick.cli.write_shared_profile")
+@patch("awspick.cli.update_aws_profile")
+@patch("awspick.cli.detect_shell")
+@patch("awspick.cli.get_current_profile")
 def test_main_failed_update(
     mock_get_current_profile,
     mock_detect_shell,
@@ -211,14 +211,14 @@ def test_main_failed_update(
     mock_write_shared.assert_not_called()
 
 
-@patch("aws_pick.cli.read_aws_profiles")
-@patch("aws_pick.cli.display_profiles")
-@patch("aws_pick.cli.get_profile_selection")
-@patch("aws_pick.cli.write_shared_profile")
-@patch("aws_pick.cli.update_aws_profile")
-@patch("aws_pick.cli.detect_shell")
+@patch("awspick.cli.read_aws_profiles")
+@patch("awspick.cli.display_profiles")
+@patch("awspick.cli.get_profile_selection")
+@patch("awspick.cli.write_shared_profile")
+@patch("awspick.cli.update_aws_profile")
+@patch("awspick.cli.detect_shell")
 @patch("builtins.print")
-@patch("aws_pick.cli.get_current_profile")
+@patch("awspick.cli.get_current_profile")
 def test_main_outputs_export_command(
     mock_get_current_profile,
     mock_print,

@@ -5,7 +5,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 
-from aws_pick.config import (
+from awspick.config import (
     display_profiles,
     get_aws_config_path,
     get_grouped_profiles,
@@ -20,7 +20,7 @@ def test_get_aws_config_path():
     assert get_aws_config_path() == expected_path
 
 
-@patch("aws_pick.config.get_aws_config_path")
+@patch("awspick.config.get_aws_config_path")
 @patch("configparser.ConfigParser")
 def test_read_aws_profiles(mock_configparser, mock_get_path):
     """Test reading AWS profiles from config."""
@@ -41,7 +41,7 @@ def test_read_aws_profiles(mock_configparser, mock_get_path):
     mock_config.read.assert_called_once_with(mock_path)
 
 
-@patch("aws_pick.config.get_aws_config_path")
+@patch("awspick.config.get_aws_config_path")
 def test_read_aws_profiles_no_config(mock_get_path):
     """Test reading AWS profiles when config doesn't exist."""
     # Setup mock
@@ -56,7 +56,7 @@ def test_read_aws_profiles_no_config(mock_get_path):
     assert profiles == []
 
 
-@patch("aws_pick.config.Console")
+@patch("awspick.config.Console")
 def test_display_profiles(mock_console_class):
     """Test displaying profiles using rich."""
     mock_console = MagicMock()
@@ -69,7 +69,7 @@ def test_display_profiles(mock_console_class):
     mock_console.print.assert_called_once()
 
 
-@patch("aws_pick.config.Console")
+@patch("awspick.config.Console")
 def test_display_profiles_empty(mock_console_class):
     """Test displaying profiles when no profiles are found."""
     mock_console = MagicMock()
