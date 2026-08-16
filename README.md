@@ -328,7 +328,7 @@ isort .
 ## Project Structure
 
 ```
-aws-pick/
+aws-profile-pick/
 ├── awspick.py       # Single-file launcher script
 ├── awspick/
 │   ├── __init__.py
