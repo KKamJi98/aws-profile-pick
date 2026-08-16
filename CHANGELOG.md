@@ -1,4 +1,11 @@
 # Changelog
+## [2.0.1](https://github.com/KKamJi98/aws-profile-pick/compare/v2.0.0...v2.0.1) (2026-08-16)
+
+
+### Bug Fixes
+
+* **ci:** publish from the release-please job instead of a tag trigger ([bde8ef7](https://github.com/KKamJi98/aws-profile-pick/commit/bde8ef7c66a83fe10c22e04d7234790e45b867cc))
+
 ## [2.0.0](https://github.com/KKamJi98/aws-profile-pick/compare/v1.4.1...v2.0.0) (2026-08-16)
 
 
