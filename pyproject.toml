@@ -1,6 +1,6 @@
 [project]
 name = "aws-profile-pick"
-version = "1.4.1"
+version = "2.0.0"
 description = "A simple CLI tool to easily switch between AWS profiles in your shell environment"
 readme = "README.md"
 license = { text = "MIT" }

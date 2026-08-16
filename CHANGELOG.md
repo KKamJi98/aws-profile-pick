@@ -1,4 +1,38 @@
 # Changelog
+## [2.0.0](https://github.com/KKamJi98/aws-profile-pick/compare/v1.4.1...v2.0.0) (2026-08-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* publish as aws-profile-pick
+* rename the distribution to awspick and publish to PyPI
+
+### refac
+
+* publish as aws-profile-pick ([567a1ab](https://github.com/KKamJi98/aws-profile-pick/commit/567a1abf5b2eec09d5be84e3a5eeaade4b145cb0))
+* rename the distribution to awspick and publish to PyPI ([dcbda7c](https://github.com/KKamJi98/aws-profile-pick/commit/dcbda7c858f80dcb5b94980b4c91d558133bf653))
+
+
+### Features
+
+* **cli:** show current AWS profile in table ([ae47974](https://github.com/KKamJi98/aws-profile-pick/commit/ae4797446e096ceea77599ac1edda9566a2188a8))
+* **group:** add group dividers, others positioning, and wildcard catch-all ([2d1ca68](https://github.com/KKamJi98/aws-profile-pick/commit/2d1ca684b919775951fe1fb37eb10a5597b1d15d))
+* **shell:** sync profile across shells ([537133b](https://github.com/KKamJi98/aws-profile-pick/commit/537133b96a83e62a7495f83c22899ab177c317fe))
+
+
+### Bug Fixes
+
+* apply ruff format to config.py ([4e6197f](https://github.com/KKamJi98/aws-profile-pick/commit/4e6197fa2ba3e3e5f7be624bb7a6ad7bc5fc142c))
+* **backup:** keep only two rc backups ([7869b41](https://github.com/KKamJi98/aws-profile-pick/commit/7869b414bcb826cbb18ce6c752380fc152c08d42))
+* **ci:** pin ruff to the project and give it a rule set ([6d83abe](https://github.com/KKamJi98/aws-profile-pick/commit/6d83abe33aa56b7b84f9f76497613cdb15c93f1b))
+
+
+### Documentation
+
+* add uv tool upgrade and editable install instructions to README.md ([78f0f07](https://github.com/KKamJi98/aws-profile-pick/commit/78f0f07ec0cf41a99f3476bc27bdbe58c2e9a333))
+* replace non-ASCII dashes and point the clone URL at the new name ([e6d9961](https://github.com/KKamJi98/aws-profile-pick/commit/e6d9961f973c2b2e45574aa3de8a852f1a9f407a))
+* update the project tree root name ([45dd786](https://github.com/KKamJi98/aws-profile-pick/commit/45dd786ab4c01d8516284be43be40184fe4dadb8))
+
 ## [1.4.1](https://github.com/KKamJi98/aws-pick/compare/v1.4.0...v1.4.1) (2025-12-05)
 
 
