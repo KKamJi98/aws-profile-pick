@@ -1,4 +1,11 @@
 # Changelog
+## [2.0.2](https://github.com/KKamJi98/aws-profile-pick/compare/v2.0.1...v2.0.2) (2026-08-16)
+
+
+### Documentation
+
+* link back to the source from PyPI ([785a7bd](https://github.com/KKamJi98/aws-profile-pick/commit/785a7bd66936dfba3c910842101e2d104f420290))
+
 ## [2.0.1](https://github.com/KKamJi98/aws-profile-pick/compare/v2.0.0...v2.0.1) (2026-08-16)
 
 
