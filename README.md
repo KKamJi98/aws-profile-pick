@@ -71,7 +71,17 @@ AWS Pick (`awspick`) is a command-line utility that helps you quickly switch bet
 
 Use uv's tool installation when you want `awspick` available outside any virtual environment.
 
+The distribution is `aws-profile-pick` and the command it installs is `awspick`. They differ
+because `aws-pick` on PyPI is an unrelated tool, and every separator variant of that name
+normalises onto the same taken one.
+
 ```bash
+# PyPI
+uv tool install aws-profile-pick
+
+# Straight from the repository
+uv tool install git+https://github.com/KKamJi98/aws-profile-pick
+
 # Install from the current checkout as a global tool
 uv tool install .
 

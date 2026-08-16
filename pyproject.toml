@@ -1,5 +1,5 @@
 [project]
-name = "awspick"
+name = "aws-profile-pick"
 version = "1.4.1"
 description = "A simple CLI tool to easily switch between AWS profiles in your shell environment"
 readme = "README.md"
@@ -40,6 +40,13 @@ awspick = "awspick.cli:main"
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+# The distribution is aws-profile-pick and the import package is awspick, so
+# hatchling's name-matching heuristic finds nothing. aws-pick was taken on PyPI
+# by an unrelated tool and every separator variant normalises onto it, so the
+# distribution had to move while the command stayed put.
+[tool.hatch.build.targets.wheel]
+packages = ["awspick"]
 
 
 
