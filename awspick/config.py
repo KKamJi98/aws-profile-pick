@@ -110,9 +110,7 @@ def _parse_group_rules(rules: Optional[str]) -> List[Tuple[str, List[str]]]:
     return ordered
 
 
-def _match_any(
-    text: str, patterns: List[str], *, regex: bool, case_sensitive: bool
-) -> bool:
+def _match_any(text: str, patterns: List[str], *, regex: bool, case_sensitive: bool) -> bool:
     import re as _re
 
     flags = 0 if case_sensitive else _re.IGNORECASE
@@ -153,9 +151,7 @@ def filter_profiles(
     result = list(profiles)
     if include:
         result = [
-            p
-            for p in result
-            if _match_any(p, include, regex=regex, case_sensitive=case_sensitive)
+            p for p in result if _match_any(p, include, regex=regex, case_sensitive=case_sensitive)
         ]
     if exclude:
         result = [
@@ -273,9 +269,7 @@ def display_profiles(
             table.add_section()
         prev_group = group_name
         color = group_colors.get(group_name, "white")
-        is_current = (
-            current_profile_norm is not None and profile.lower() == current_profile_norm
-        )
+        is_current = current_profile_norm is not None and profile.lower() == current_profile_norm
         current_marker = "[bold green]*[/bold green]" if is_current else ""
         table.add_row(
             str(i + 1),
@@ -312,9 +306,7 @@ def validate_profile_selection(selection: str, profiles: List[str]) -> Optional[
         if 0 <= index < len(profiles):
             return profiles[index]
         else:
-            logger.error(
-                f"Invalid profile number: {selection}. Valid range is 1-{len(profiles)}"
-            )
+            logger.error(f"Invalid profile number: {selection}. Valid range is 1-{len(profiles)}")
             return None
 
     # Check if selection is a profile name

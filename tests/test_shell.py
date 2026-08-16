@@ -3,7 +3,6 @@
 from pathlib import Path
 from unittest.mock import MagicMock, mock_open, patch
 
-
 from awspick.shell import (
     BACKUP_RETENTION_COUNT,
     ShellConfig,
@@ -20,14 +19,10 @@ from awspick.shell import (
 
 def test_shell_config():
     """Test ShellConfig class."""
-    config = ShellConfig(
-        "bash", Path("/home/user/.bashrc"), 'export AWS_PROFILE="{profile_name}"'
-    )
+    config = ShellConfig("bash", Path("/home/user/.bashrc"), 'export AWS_PROFILE="{profile_name}"')
 
     # Test get_profile_line
-    assert (
-        config.get_profile_line("test-profile") == 'export AWS_PROFILE="test-profile"'
-    )
+    assert config.get_profile_line("test-profile") == 'export AWS_PROFILE="test-profile"'
 
     # Test get_profile_pattern
     pattern = config.get_profile_pattern()
@@ -138,9 +133,7 @@ def test_get_current_profile_from_env(mock_environ, mock_get_rc_path):
     new_callable=mock_open,
     read_data='export AWS_PROFILE="prod"\n',
 )
-def test_get_current_profile_from_rc_file(
-    mock_file, mock_exists, mock_environ, mock_get_rc_path
-):
+def test_get_current_profile_from_rc_file(mock_file, mock_exists, mock_environ, mock_get_rc_path):
     """Test reading current profile from rc file when env is not set."""
     mock_environ.get.return_value = ""
     rc_path = Path("/home/user/.bashrc")
@@ -223,9 +216,7 @@ def test_update_aws_profile_bash(mock_file, mock_exists, mock_backup, mock_get_r
     # Check file write
     mock_file.assert_called_with(rc_path, "w")
     handle = mock_file()
-    written_content = "".join(
-        call_args[0][0] for call_args in handle.write.call_args_list
-    )
+    written_content = "".join(call_args[0][0] for call_args in handle.write.call_args_list)
     assert 'export AWS_PROFILE="new-profile"' in written_content
 
 
@@ -243,9 +234,7 @@ def test_update_aws_profile_fish(mock_file, mock_exists, mock_backup, mock_get_r
     rc_path = Path("/home/user/.config/fish/config.fish")
     shell_config = ShellConfig("fish", rc_path, 'set -gx AWS_PROFILE "{profile_name}"')
     mock_get_rc_path.return_value = (rc_path, shell_config)
-    mock_backup.return_value = Path(
-        "/home/user/.config/fish/config.fish.bak-20250605060000"
-    )
+    mock_backup.return_value = Path("/home/user/.config/fish/config.fish.bak-20250605060000")
 
     # Call function
     success, backup_path = update_aws_profile("new-profile", "fish")
@@ -258,9 +247,7 @@ def test_update_aws_profile_fish(mock_file, mock_exists, mock_backup, mock_get_r
     # Check file write
     mock_file.assert_called_with(rc_path, "w")
     handle = mock_file()
-    written_content = "".join(
-        call_args[0][0] for call_args in handle.write.call_args_list
-    )
+    written_content = "".join(call_args[0][0] for call_args in handle.write.call_args_list)
     assert 'set -gx AWS_PROFILE "new-profile"' in written_content
 
 
@@ -329,9 +316,7 @@ def test_update_aws_profile_no_rc_file_fish(
     # Mock path operations
     mock_exists.return_value = False
     mock_mkdir.return_value = None
-    mock_backup.return_value = Path(
-        "/home/user/.config/fish/config.fish.bak-20250605060000"
-    )
+    mock_backup.return_value = Path("/home/user/.config/fish/config.fish.bak-20250605060000")
 
     # Call function
     success, backup_path = update_aws_profile("new-profile", "fish")
@@ -342,9 +327,7 @@ def test_update_aws_profile_no_rc_file_fish(
     mock_file.assert_called_with(rc_path, "w")
     handle = mock_file()
     handle.write.assert_called()
-    written_content = "".join(
-        call_args[0][0] for call_args in handle.write.call_args_list
-    )
+    written_content = "".join(call_args[0][0] for call_args in handle.write.call_args_list)
     assert "# Created by AWS Pick" in written_content
 
 

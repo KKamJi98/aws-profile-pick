@@ -3,7 +3,6 @@
 import sys
 from unittest.mock import patch
 
-
 from awspick.cli import get_profile_selection, main
 
 

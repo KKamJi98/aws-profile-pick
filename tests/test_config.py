@@ -4,7 +4,6 @@ import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-
 from awspick.config import (
     display_profiles,
     get_aws_config_path,

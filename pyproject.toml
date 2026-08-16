@@ -29,9 +29,8 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest>=7.3.1,<8.0.0",
-    "black>=23.3.0,<24.0.0",
-    "isort>=5.12.0,<6.0.0",
     "pytest-cov>=4.1.0,<5.0.0",
+    "ruff>=0.14,<0.15",
 ]
 
 [project.scripts]
@@ -53,3 +52,15 @@ packages = ["awspick"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = "test_*.py"
+
+# ruff replaces the black and isort pair that used to be declared here and never
+# ran in CI. The rule set is written out rather than left to the default: CI used
+# to `uv pip install ruff` unpinned against a project that configured nothing, so
+# a ruff release could turn a green build red with no commit in between. That is
+# what happened between February and August.
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]

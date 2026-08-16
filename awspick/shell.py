@@ -55,9 +55,7 @@ class ShellConfig:
             re.Pattern: Compiled regex pattern
         """
         if self.name == "fish":
-            return re.compile(
-                r'^set -[gx] AWS_PROFILE\s+["\']?(.+?)["\']?\s*$', re.MULTILINE
-            )
+            return re.compile(r'^set -[gx] AWS_PROFILE\s+["\']?(.+?)["\']?\s*$', re.MULTILINE)
         else:
             return re.compile(r"^export\s+AWS_PROFILE=(.+)$", re.MULTILINE)
 
@@ -105,12 +103,8 @@ def get_shell_configs() -> Dict[str, ShellConfig]:
     """
     home = Path.home()
     return {
-        "bash": ShellConfig(
-            "bash", home / ".bashrc", 'export AWS_PROFILE="{profile_name}"'
-        ),
-        "zsh": ShellConfig(
-            "zsh", home / ".zshrc", 'export AWS_PROFILE="{profile_name}"'
-        ),
+        "bash": ShellConfig("bash", home / ".bashrc", 'export AWS_PROFILE="{profile_name}"'),
+        "zsh": ShellConfig("zsh", home / ".zshrc", 'export AWS_PROFILE="{profile_name}"'),
         "fish": ShellConfig(
             "fish",
             home / ".config" / "fish" / "config.fish",
@@ -255,9 +249,7 @@ def get_current_profile(shell_name: str = None) -> Optional[str]:
         return None
 
 
-def update_aws_profile(
-    profile_name: str, shell_name: str = None
-) -> Tuple[bool, Optional[Path]]:
+def update_aws_profile(profile_name: str, shell_name: str = None) -> Tuple[bool, Optional[Path]]:
     """
     Update the AWS_PROFILE environment variable in the shell rc file.
 
@@ -316,9 +308,7 @@ def update_aws_profile(
             new_content = aws_profile_pattern.sub(
                 shell_config.get_profile_line(profile_name), content
             )
-            logger.info(
-                f"Replacing existing AWS_PROFILE={current_profile} with {profile_name}"
-            )
+            logger.info(f"Replacing existing AWS_PROFILE={current_profile} with {profile_name}")
         else:
             # Add AWS_PROFILE at the end
             new_content = (

@@ -17,28 +17,24 @@ jobs:
     env:
       STAGE: ${{ github.ref == 'refs/heads/main' && 'prod' || 'preprod' }}
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
         with:
           python-version: '3.11'
-      - name: Install uv
-        run: pip install uv
-      - name: Install dependencies
-        run: |
-          uv venv .venv
-          uv pip install -e .[dev]
-          echo "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"
-      - name: Install ruff
-        run: |
-          uv pip install ruff
-      - name: Run tests
-        run: |
-          source .venv/bin/activate
-          pytest -q
+
+      # `uv run` resolves against uv.lock, so the ruff CI enforces is the ruff
+      # declared here. The previous steps ran `uv pip install ruff` unpinned
+      # against a project that configured no rules, which made the verdict a
+      # function of the calendar: green in February, 75 errors in August with no
+      # commit in between.
+      - name: Test
+        run: uv run --extra dev pytest -q
+
       - name: Lint
         run: |
-          ruff check .
-          ruff format --check .
+          uv run --extra dev ruff check .
+          uv run --extra dev ruff format --check .
 
   release-please:
     needs: test
