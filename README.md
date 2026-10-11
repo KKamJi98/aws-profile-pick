@@ -317,13 +317,11 @@ isort .
 
 ## CI
 
-- Single workflow: `.github/workflows/ci.yml`
-- Triggers:
-  - `pull_request` and all branch `push`
-- Behavior:
-  - Runs tests and lint on every PR/push
-  - Uses `STAGE=prod` on `main`, otherwise `STAGE=preprod`
-  - Runs `googleapis/release-please-action@v4` only on `main`
+- `.github/workflows/ci.yml`: tests and lint on every pull request and on pushes to branches other than `main`.
+- `.github/workflows/release.yml`: on every push to `main`, runs the same checks, then `googleapis/release-please-action@v4`. When release-please cuts a release, the same run builds the package and publishes it to PyPI through Trusted Publishing (environment `pypi`).
+- release-please authenticates with a GitHub App installation token so that CI runs on its release PRs. The repository needs:
+  - variable `RELEASE_APP_CLIENT_ID`: the App's client ID
+  - secret `RELEASE_APP_PRIVATE_KEY`: the App's private key
 
 ## Project Structure
 
