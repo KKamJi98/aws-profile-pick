@@ -189,6 +189,7 @@ fn selection_quit_and_empty_exit_1_without_writing() {
 
 #[test]
 fn keyboard_interrupt_during_prompt_cancels_with_exit_1() {
+    use std::io::Read;
     let h = Home::new(Some(CFG));
     h.write(".zshrc", "");
     let mut child = h
@@ -199,14 +200,24 @@ fn keyboard_interrupt_during_prompt_cancels_with_exit_1() {
         .spawn()
         .unwrap();
     let _stdin = child.stdin.take();
-    std::thread::sleep(Duration::from_millis(300));
+    // Wait for the prompt, so the signal lands while input is being read.
+    let mut err = child.stderr.take().unwrap();
+    let mut seen = Vec::new();
+    let mut buf = [0u8; 4096];
+    while !String::from_utf8_lossy(&seen).contains("Enter profile number or name: ") {
+        let n = err.read(&mut buf).unwrap();
+        assert!(n > 0, "stderr closed before the prompt");
+        seen.extend_from_slice(&buf[..n]);
+    }
+    std::thread::sleep(Duration::from_millis(100));
     Command::new("kill")
         .args(["-INT", &child.id().to_string()])
         .status()
         .unwrap();
-    let o = child.wait_with_output().unwrap();
-    assert_eq!(o.status.code(), Some(1));
-    let e = stderr(&o);
+    err.read_to_end(&mut seen).unwrap();
+    let status = child.wait().unwrap();
+    assert_eq!(status.code(), Some(1));
+    let e = String::from_utf8_lossy(&seen);
     assert!(e.contains("\nOperation cancelled.\n"), "{e}");
     assert!(e.contains("INFO: Profile selection cancelled via keyboard interrupt"));
 }
@@ -421,3 +432,4 @@ fn usage_errors_exit_2() {
         );
     }
 }
+

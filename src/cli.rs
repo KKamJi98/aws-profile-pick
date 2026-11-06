@@ -116,7 +116,6 @@ enum Input {
 
 fn read_line() -> Input {
     let mut buf = Vec::new();
-    IN_PROMPT.store(true, Ordering::SeqCst);
     let r = io::stdin().lock().read_until(b'\n', &mut buf);
     IN_PROMPT.store(false, Ordering::SeqCst);
     match r {
@@ -142,6 +141,8 @@ enum Selection {
 
 fn get_profile_selection(profiles: &[String]) -> Selection {
     loop {
+        // 2.x caught KeyboardInterrupt around both the prompt and input().
+        IN_PROMPT.store(true, Ordering::SeqCst);
         out::err_raw("Enter profile number or name: ");
         let line = match read_line() {
             Input::Line(l) => l,
