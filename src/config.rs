@@ -274,48 +274,102 @@ fn section_header(clean: &str) -> Option<&str> {
     Some(&rest[..end])
 }
 
-/// Read profile names from `~/.aws/config`, logging as awspick 2.x did.
-pub fn read_aws_profiles(path: &Path) -> Vec<String> {
-    if !path.exists() {
+/// Read profile names from the AWS config file and the shared credentials
+/// file, logging as awspick 2.x did. 2.x read only the config file; the AWS
+/// CLI (`aws configure list-profiles`) also lists the credentials file's
+/// sections, and so does awspick now.
+pub fn read_aws_profiles(home: &Path) -> Vec<String> {
+    let path = aws_config_path(home);
+    let config_exists = path.exists();
+    let mut profiles: Vec<String> = Vec::new();
+    if config_exists {
+        let Some(sections) = read_config_sections(&path) else {
+            return Vec::new();
+        };
+        // Each name once, as in botocore's profile map: [default] and
+        // [profile default] are the same profile.
+        for section in sections {
+            if let Some(name) = profile_name(&section)
+                && !profiles.contains(&name)
+            {
+                profiles.push(name);
+            }
+        }
+    }
+    let credentials = read_credentials_profiles(&aws_credentials_path(home));
+    if !config_exists && credentials.is_empty() {
         out::error(&format!("AWS config file not found at {}", path.display()));
         return Vec::new();
     }
-    // configparser.read() silently skips files it cannot open.
-    let sections = match std::fs::read(path) {
-        Err(_) => Vec::new(),
-        Ok(bytes) => {
-            let text = match py::decode_utf8(&bytes) {
-                Ok(t) => py::universal_newlines(&t),
-                Err(msg) => {
-                    out::error(&format!("Unexpected error reading AWS profiles: {msg}"));
-                    return Vec::new();
-                }
-            };
-            match parse_sections(&text) {
-                Ok(s) => s,
-                Err(e) => {
-                    out::error(&format!(
-                        "Error parsing AWS config file: {}",
-                        e.message(path)
-                    ));
-                    return Vec::new();
-                }
-            }
-        }
-    };
-    // Each name once, as in botocore's profile map: [default] and
-    // [profile default] are the same profile.
-    let mut profiles: Vec<String> = Vec::new();
-    for section in sections {
-        if let Some(name) = profile_name(&section)
-            && !profiles.contains(&name)
-        {
+    for name in credentials {
+        if !profiles.contains(&name) {
             profiles.push(name);
         }
     }
     out::info(&format!("Found {} AWS profiles", profiles.len()));
     profiles.sort();
     profiles
+}
+
+/// The config file's sections, or `None` after logging why it was rejected.
+fn read_config_sections(path: &Path) -> Option<Vec<String>> {
+    // configparser.read() silently skips files it cannot open.
+    let Ok(bytes) = std::fs::read(path) else {
+        return Some(Vec::new());
+    };
+    let text = match py::decode_utf8(&bytes) {
+        Ok(t) => py::universal_newlines(&t),
+        Err(msg) => {
+            out::error(&format!("Unexpected error reading AWS profiles: {msg}"));
+            return None;
+        }
+    };
+    match parse_sections(&text) {
+        Ok(s) => Some(s),
+        Err(e) => {
+            out::error(&format!(
+                "Error parsing AWS config file: {}",
+                e.message(path)
+            ));
+            None
+        }
+    }
+}
+
+/// The shared credentials file the AWS CLI reads:
+/// `$AWS_SHARED_CREDENTIALS_FILE` (expanded like `AWS_CONFIG_FILE`), else
+/// `~/.aws/credentials`.
+pub fn aws_credentials_path(home: &Path) -> PathBuf {
+    match std::env::var("AWS_SHARED_CREDENTIALS_FILE") {
+        Ok(p) if !p.is_empty() => expand_user(&expand_vars(&p), home),
+        _ => home.join(".aws").join("credentials"),
+    }
+}
+
+/// Profile names in the credentials file. botocore takes every section name
+/// literally (no `profile ` prefix) except configparser's `DEFAULT`. The
+/// file is parsed only to find its sections and to reject what botocore
+/// rejects; no value is kept, and a broken file is skipped with a warning
+/// instead of hiding the config file's profiles.
+fn read_credentials_profiles(path: &Path) -> Vec<String> {
+    if !path.is_file() {
+        return Vec::new();
+    }
+    let Ok(bytes) = std::fs::read(path) else {
+        return Vec::new();
+    };
+    let parsed = py::decode_utf8(&bytes)
+        .and_then(|t| parse_sections(&py::universal_newlines(&t)).map_err(|e| e.message(path)));
+    match parsed {
+        Ok(sections) => sections,
+        Err(msg) => {
+            out::warning(&format!(
+                "Ignoring AWS credentials file {}: {msg}",
+                path.display()
+            ));
+            Vec::new()
+        }
+    }
 }
 
 /// Ordered group rules: `[(group, [keywords])]`.

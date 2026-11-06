@@ -987,3 +987,62 @@ fn profile_argument_switches_without_prompt() {
     // Only one positional.
     assert_eq!(run(&["dev", "prod"]).status.code(), Some(2));
 }
+
+/// Profiles that exist only in the credentials file are listed, like
+/// `aws configure list-profiles` does; their values never show up.
+#[test]
+fn credentials_file_profiles_are_listed() {
+    let h = Home::new(Some("[profile a]\n[default]\n"));
+    h.write(
+        ".aws/credentials",
+        "[cred-only]\naws_access_key_id = AKIDSECRETVALUE\n[DEFAULT]\nk = v\n\
+         [profile p]\n[default]\n[a]\n[x] ; c\n",
+    );
+    h.write(".zshrc", "");
+    let names = |o: &Output| -> Vec<String> {
+        stderr(o)
+            .lines()
+            .filter(|l| l.starts_with('│'))
+            .map(|l| l.split('│').nth(2).unwrap().trim().to_owned())
+            .collect()
+    };
+    let o = h.run("/bin/zsh", &[], "q\n");
+    let e = stderr(&o);
+    assert!(e.contains("INFO: Found 5 AWS profiles"), "{e}");
+    // `aws configure list-profiles` (AWS CLI 2.39) on the same files:
+    // a, default, cred-only, profile p, x.
+    assert_eq!(names(&o), ["a", "cred-only", "default", "profile p", "x"]);
+    assert!(!e.contains("AKID") && !e.contains("SECRET"), "{e}");
+
+    // AWS_SHARED_CREDENTIALS_FILE, with $VAR and ~ expanded; no config file.
+    let h = Home::new(None);
+    h.write("c/creds", "[viaenv]\n");
+    h.write(".zshrc", "");
+    let o = run_with(
+        h.cmd(Some("/bin/zsh"))
+            .env("D", h.path.join("c"))
+            .env("AWS_SHARED_CREDENTIALS_FILE", "$D/creds"),
+        "viaenv\n",
+    );
+    assert_eq!(o.status.code(), Some(0), "{}", stderr(&o));
+    assert_eq!(stdout(&o), "export AWS_PROFILE=\"viaenv\"\n");
+    assert!(!stderr(&o).contains("ERROR"), "{}", stderr(&o));
+
+    // A broken credentials file is skipped with a warning that does not
+    // quote the file; the config file's profiles still work.
+    let h = Home::new(Some("[profile a]\n"));
+    h.write(
+        ".aws/credentials",
+        "aws_secret_access_key = SECRETVALUE\n[ok]\n",
+    );
+    h.write(".zshrc", "");
+    let o = h.run("/bin/zsh", &[], "q\n");
+    let e = stderr(&o);
+    assert!(
+        e.contains("WARNING: Ignoring AWS credentials file ")
+            && e.contains("File contains no section headers."),
+        "{e}"
+    );
+    assert!(!e.contains("SECRETVALUE"), "{e}");
+    assert_eq!(names(&o), ["a"]);
+}

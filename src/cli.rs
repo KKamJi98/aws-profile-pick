@@ -206,7 +206,7 @@ fn run_with_home(home: &Path) -> i32 {
     };
     out::set_verbose(args.verbose);
 
-    let profiles = config::read_aws_profiles(&config::aws_config_path(home));
+    let profiles = config::read_aws_profiles(home);
     if profiles.is_empty() {
         out::error("No AWS profiles found. Please check your AWS configuration.");
         return 1;
