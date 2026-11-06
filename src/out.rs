@@ -2,11 +2,19 @@
 //!
 //! awspick 2.x printed through Python's `logging` (configured as
 //! `LEVEL: message` on stderr) and through `print`. Every message here keeps
-//! that shape. Write errors are ignored: a closed stderr must not turn a
+//! that shape; INFO lines appear only with `-v/--verbose`. Write errors are ignored: a closed stderr must not turn a
 //! successful profile switch into a panic, and a closed stdout (EPIPE) ends
 //! the program quietly instead of with Rust's "failed printing" panic.
 
 use std::io::{self, Write};
+use std::sync::atomic::{AtomicBool, Ordering};
+
+/// `-v/--verbose`. 2.x always printed its INFO lines; they are now opt-in.
+static VERBOSE: AtomicBool = AtomicBool::new(false);
+
+pub fn set_verbose(on: bool) {
+    VERBOSE.store(on, Ordering::SeqCst);
+}
 
 pub fn err_raw(s: &str) {
     let mut e = io::stderr().lock();
@@ -19,7 +27,9 @@ pub fn eprintln(s: &str) {
 }
 
 pub fn info(s: &str) {
-    eprintln(&format!("INFO: {s}"));
+    if VERBOSE.load(Ordering::SeqCst) {
+        eprintln(&format!("INFO: {s}"));
+    }
 }
 
 pub fn warning(s: &str) {

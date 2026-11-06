@@ -61,6 +61,10 @@ pub struct Cli {
     /// Make filter/exclude matching case-sensitive
     #[arg(long = "case-sensitive")]
     case_sensitive: bool,
+
+    /// Print INFO log lines on stderr
+    #[arg(short = 'v', long)]
+    verbose: bool,
 }
 
 static IN_PROMPT: AtomicBool = AtomicBool::new(false);
@@ -195,6 +199,7 @@ fn run_with_home(home: &Path) -> i32 {
             return code;
         }
     };
+    out::set_verbose(args.verbose);
 
     let profiles = config::read_aws_profiles(&config::aws_config_path(home));
     if profiles.is_empty() {

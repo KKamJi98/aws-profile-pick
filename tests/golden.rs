@@ -132,6 +132,8 @@ fn run_case(case: &Value) -> Value {
             .arg("\"$@\"; exit $?")
             .arg("sh")
             .arg(BIN)
+            // 2.x always logged at INFO; 3.x does with -v.
+            .arg("-v")
             .args(&args)
             .env_clear()
             .envs(&env)

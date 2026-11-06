@@ -49,7 +49,15 @@ impl Home {
         v.sort();
         v
     }
+    /// The binary with `-v`, so the INFO lines 2.x always printed (and the
+    /// ported tests check) are there.
     fn cmd(&self, shell: Option<&str>) -> Command {
+        let mut c = self.quiet_cmd(shell);
+        c.arg("-v");
+        c
+    }
+    /// The binary with its default output.
+    fn quiet_cmd(&self, shell: Option<&str>) -> Command {
         let mut c = Command::new(BIN);
         c.env_clear()
             .env("PATH", "/usr/bin:/bin")
@@ -889,5 +897,38 @@ fn version_prints_the_crate_version() {
             format!("awspick {}\n", env!("CARGO_PKG_VERSION"))
         );
         assert_eq!(stderr(&o), "");
+    }
+}
+
+/// INFO lines are opt-in; the table, prompt, summary lines and the export
+/// line are not.
+#[test]
+fn info_lines_need_verbose() {
+    let h = Home::new(Some(CFG));
+    h.write(".zshrc", "export AWS_PROFILE=\"dev\"\n");
+    let o = run_with(&mut h.quiet_cmd(Some("/bin/zsh")), "prod\n");
+    assert_eq!(o.status.code(), Some(0));
+    let e = stderr(&o);
+    assert!(!e.contains("INFO:"), "{e}");
+    assert!(
+        e.contains("Enter profile number or name: Selected profile: prod\n"),
+        "{e}"
+    );
+    assert!(e.contains("Backup created at "), "{e}");
+    assert!(e.contains("with AWS_PROFILE=prod\n"), "{e}");
+    assert!(
+        e.contains("Run 'eval \"$(awspick)\"' to apply in the current shell\n"),
+        "{e}"
+    );
+    assert_eq!(stdout(&o), "export AWS_PROFILE=\"prod\"\n");
+
+    for flag in ["-v", "--verbose"] {
+        let o = run_with(h.quiet_cmd(Some("/bin/zsh")).arg(flag), "q\n");
+        let e = stderr(&o);
+        assert!(e.contains("INFO: Found 3 AWS profiles\n"), "{e}");
+        assert!(
+            e.contains("INFO: User cancelled profile selection\n"),
+            "{e}"
+        );
     }
 }
