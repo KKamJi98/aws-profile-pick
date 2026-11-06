@@ -875,3 +875,19 @@ fn atomic_write_keeps_symlink_mode_and_permissions() {
     );
     assert_eq!(h.read("dotfiles/zshrc"), "export AWS_PROFILE=\"prod\"\n");
 }
+
+// --- Phase 4 ----------------------------------------------------------------
+
+#[test]
+fn version_prints_the_crate_version() {
+    let h = Home::new(None);
+    for flag in ["-V", "--version"] {
+        let o = h.run("/bin/zsh", &[flag], "");
+        assert_eq!(o.status.code(), Some(0));
+        assert_eq!(
+            stdout(&o),
+            format!("awspick {}\n", env!("CARGO_PKG_VERSION"))
+        );
+        assert_eq!(stderr(&o), "");
+    }
+}

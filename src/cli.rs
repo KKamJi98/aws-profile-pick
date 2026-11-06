@@ -20,6 +20,7 @@ use crate::table;
 #[command(
     name = "awspick",
     about = "AWS profile picker",
+    version,
     args_override_self = true,
     infer_long_args = true
 )]
