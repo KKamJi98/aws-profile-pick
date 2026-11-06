@@ -71,6 +71,7 @@ class Awspick < Formula
 
   def install
     bin.install "awspick"
+    generate_completions_from_executable(bin/"awspick", "--completions", shells: [:bash, :zsh, :fish])
   end
 
   test do
