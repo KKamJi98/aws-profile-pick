@@ -422,6 +422,9 @@ fn help_lists_every_option() {
         "--group-rules",
         "--regex",
         "--case-sensitive",
+        "-v, --verbose",
+        "-V, --version",
+        "[PROFILE]",
         "AWS profile picker",
     ] {
         assert!(out.contains(opt), "missing {opt}:\n{out}");
@@ -432,7 +435,7 @@ fn help_lists_every_option() {
 #[test]
 fn usage_errors_exit_2() {
     let h = Home::new(Some(CFG));
-    for args in [&["--grou", "x"][..], &["extra"], &["-f"], &["--bogus"]] {
+    for args in [&["--grou", "x"][..], &["one", "two"], &["-f"], &["--bogus"]] {
         assert_eq!(
             h.run("/bin/zsh", args, "").status.code(),
             Some(2),
@@ -931,4 +934,56 @@ fn info_lines_need_verbose() {
             "{e}"
         );
     }
+}
+
+/// `awspick <profile>` switches without the table or the prompt.
+#[test]
+fn profile_argument_switches_without_prompt() {
+    let h = Home::new(Some(
+        "[profile dev]\n[profile Prod]\n[profile Stage]\n[profile stage]\n[profile 2]\n",
+    ));
+    h.write(".zshrc", "export AWS_PROFILE=\"dev\"\n");
+    let run = |args: &[&str]| run_with(h.quiet_cmd(Some("/bin/zsh")).args(args), "");
+
+    // Exact name; filters only shape the table.
+    let o = run(&["-f", "zzz", "dev"]);
+    assert_eq!(o.status.code(), Some(0), "{}", stderr(&o));
+    assert_eq!(stdout(&o), "export AWS_PROFILE=\"dev\"\n");
+    let e = stderr(&o);
+    assert!(
+        !e.contains("Enter profile") && !e.contains("AWS Profiles"),
+        "{e}"
+    );
+    assert!(e.starts_with("Selected profile: dev\n"), "{e}");
+
+    // Case-insensitive when exactly one profile matches.
+    let o = run(&["prod"]);
+    assert_eq!(o.status.code(), Some(0), "{}", stderr(&o));
+    assert_eq!(stdout(&o), "export AWS_PROFILE=\"Prod\"\n");
+    assert_eq!(h.read(".zshrc"), "export AWS_PROFILE=\"Prod\"\n");
+    assert_eq!(h.read(".config/awspick/profile"), "Prod\n");
+
+    // A number is a name here.
+    let o = run(&["2"]);
+    assert_eq!(stdout(&o), "export AWS_PROFILE=\"2\"\n");
+
+    // Exact match wins over case-insensitive ones.
+    let o = run(&["stage"]);
+    assert_eq!(stdout(&o), "export AWS_PROFILE=\"stage\"\n");
+
+    let before = h.read(".zshrc");
+    let o = run(&["STAGE"]);
+    assert_eq!(o.status.code(), Some(1));
+    assert_eq!(stdout(&o), "");
+    assert_eq!(
+        stderr(&o),
+        "ERROR: Profile 'STAGE' matches more than one profile when case is ignored: 'Stage', 'stage'\n"
+    );
+    let o = run(&["nope"]);
+    assert_eq!(o.status.code(), Some(1));
+    assert_eq!(stderr(&o), "ERROR: Profile 'nope' not found\n");
+    assert_eq!(h.read(".zshrc"), before);
+
+    // Only one positional.
+    assert_eq!(run(&["dev", "prod"]).status.code(), Some(2));
 }

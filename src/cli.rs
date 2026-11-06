@@ -25,6 +25,11 @@ use crate::table;
     infer_long_args = true
 )]
 pub struct Cli {
+    /// Switch to this profile without showing the table (exact name, else a
+    /// case-insensitive match). Filters and groups do not apply
+    #[arg(value_name = "PROFILE", value_hint = clap::ValueHint::Other)]
+    profile: Option<String>,
+
     /// Deprecated, accepted and ignored for backward compatibility.
     #[arg(long = "export-command", hide = true)]
     export_command: bool,
@@ -207,6 +212,16 @@ fn run_with_home(home: &Path) -> i32 {
         return 1;
     }
 
+    if let Some(name) = &args.profile {
+        return match config::find_profile(name, &profiles) {
+            Ok(p) => switch_to(home, &p),
+            Err(msg) => {
+                out::error(&msg);
+                1
+            }
+        };
+    }
+
     let include = {
         let v = split_csv_many(&args.filter);
         if v.is_empty() {
@@ -269,13 +284,18 @@ fn run_with_home(home: &Path) -> i32 {
         }
         Selection::Unexpected(m) => return unexpected(&m),
     };
+    switch_to(home, &profile)
+}
 
+/// Write the selection to the rc file and the shared profile file, and print
+/// the export line.
+fn switch_to(home: &Path, profile: &str) -> i32 {
     out::eprintln(&format!("Selected profile: {profile}"));
 
     let shell_name = shell::detect_shell();
     let rc = shell::get_rc_path(home, Some(&shell_name));
 
-    let backup = match shell::update_aws_profile(home, &profile, &shell_name) {
+    let backup = match shell::update_aws_profile(home, profile, &shell_name) {
         Ok(Update::Unchanged) => None,
         Ok(Update::Written(b)) => Some(b),
         Err(UpdateError::Failed) => {
@@ -292,14 +312,14 @@ fn run_with_home(home: &Path) -> i32 {
         rc.rc_path.display()
     ));
 
-    match shell::write_shared_profile(home, &profile) {
+    match shell::write_shared_profile(home, profile) {
         Ok(p) => out::eprintln(&format!("Updated shared profile at {}", p.display())),
         Err(_) => out::eprintln(
             "Warning: failed to write shared profile file; other shells may not sync.",
         ),
     }
 
-    let export_cmd = shell::generate_export_command(home, &profile, &shell_name);
+    let export_cmd = shell::generate_export_command(home, profile, &shell_name);
     out::println(&export_cmd);
     out::eprintln("Run 'eval \"$(awspick)\"' to apply in the current shell");
     0

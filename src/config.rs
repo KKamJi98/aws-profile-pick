@@ -513,6 +513,32 @@ pub fn get_grouped_profiles(
 }
 
 /// `validate_profile_selection`.
+/// The profile named on the command line (`awspick <profile>`): an exact
+/// match, else the one profile that matches ignoring case. Numbers are
+/// names here; selecting by number needs the table.
+pub fn find_profile(name: &str, profiles: &[String]) -> Result<String, String> {
+    if profiles.iter().any(|p| p == name) {
+        return Ok(name.to_owned());
+    }
+    let lowered = py::lower(name);
+    let matches: Vec<&String> = profiles
+        .iter()
+        .filter(|p| py::lower(p) == lowered)
+        .collect();
+    match matches.as_slice() {
+        [one] => Ok((*one).clone()),
+        [] => Err(format!("Profile {} not found", py::repr_str(name))),
+        many => Err(format!(
+            "Profile {} matches more than one profile when case is ignored: {}",
+            py::repr_str(name),
+            many.iter()
+                .map(|p| py::repr_str(p))
+                .collect::<Vec<_>>()
+                .join(", ")
+        )),
+    }
+}
+
 pub fn validate_profile_selection(selection: &str, profiles: &[String]) -> Option<String> {
     if selection.is_empty() {
         out::error("Empty selection");
