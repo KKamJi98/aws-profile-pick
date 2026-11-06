@@ -1,14 +1,15 @@
 //! Shell detection and the rc-file update.
 //!
 //! This is the part of awspick that writes to the user's files, so it keeps
-//! the 2.x behaviour exactly: the same files, the same line format, the same
-//! regular expressions (including their anchoring at column 0, which is what
-//! leaves an indented `export AWS_PROFILE="$(cat ...)"` inside a sync hook
-//! alone), the same backup naming and rotation, and an in-place rewrite that
-//! keeps a symlinked rc file a symlink.
+//! the 2.x behaviour where it was right: the same files, the same line
+//! format, lines anchored at column 0 (which is what leaves an indented
+//! `export AWS_PROFILE="$(cat ...)"` inside a sync hook alone), the same
+//! backup naming, and a symlinked rc file stays a symlink. Where 2.x was
+//! wrong (docs/rust-migration.md, Phase 3) the fix is noted at the code.
 
 use std::fs::{self, File, OpenOptions};
 use std::io::{self, Write};
+use std::os::unix::fs::{MetadataExt, OpenOptionsExt, PermissionsExt, fchown};
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -567,15 +568,7 @@ pub fn update_aws_profile(
         appended
     };
 
-    // Rewrite in place, like open(path, "w"): a symlink stays a symlink and
-    // the file keeps its mode.
-    let written = OpenOptions::new()
-        .write(true)
-        .create(true)
-        .truncate(true)
-        .open(rc)
-        .and_then(|mut f| f.write_all(&new_content));
-    if let Err(e) = written {
+    if let Err(e) = write_rc(rc, &new_content) {
         fail(&py::os_error(&e, rc));
         return Err(UpdateError::Failed);
     }
@@ -584,6 +577,75 @@ pub fn update_aws_profile(
         rc.display()
     ));
     Ok(Update::Written(backup))
+}
+
+/// Replace the contents of the rc file, following a symlink.
+///
+/// 2.x truncated the file and wrote it again, so a failed write (full disk,
+/// quota) left a cut-off rc. Now the new contents go to a temporary file
+/// next to the real file, with its owner, group and mode, and that file is
+/// synced and renamed over it; the symlink, if any, is left alone. When the
+/// file's identity cannot be kept that way (hard links, another owner, a
+/// directory awspick cannot write to, a failed rename) the file is
+/// rewritten in place as before.
+fn write_rc(rc: &Path, data: &[u8]) -> io::Result<()> {
+    // Opening for writing first keeps 2.x's answer for an rc awspick may
+    // not write (EACCES), which a rename would otherwise get around.
+    let mut file = OpenOptions::new().write(true).open(rc)?;
+    let meta = file.metadata()?;
+    if meta.nlink() == 1
+        && let Ok(real) = fs::canonicalize(rc)
+        && let Some((tmp, mut temp)) = temp_like(&real, &meta)
+    {
+        if let Err(e) = temp.write_all(data).and_then(|()| temp.sync_all()) {
+            let _ = fs::remove_file(&tmp);
+            return Err(e);
+        }
+        drop(temp);
+        if fs::rename(&tmp, &real).is_ok() {
+            if let Some(dir) = real.parent()
+                && let Ok(dir) = File::open(dir)
+            {
+                let _ = dir.sync_all();
+            }
+            return Ok(());
+        }
+        let _ = fs::remove_file(&tmp);
+    }
+    file.set_len(0)?;
+    file.write_all(data)
+}
+
+/// A new, empty file beside `real` with the same owner, group and mode, or
+/// `None` if one cannot be made.
+fn temp_like(real: &Path, meta: &fs::Metadata) -> Option<(PathBuf, File)> {
+    let dir = real.parent()?;
+    let name = real.file_name()?.to_string_lossy();
+    for n in 0..100 {
+        let tmp = dir.join(format!(".{name}.awspick-{}-{n}.tmp", std::process::id()));
+        match OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .mode(0o600)
+            .open(&tmp)
+        {
+            Ok(f) => {
+                // chown before chmod: chown may clear set-id bits.
+                let same = fchown(&f, Some(meta.uid()), Some(meta.gid())).is_ok()
+                    && f.set_permissions(fs::Permissions::from_mode(meta.mode() & 0o7777))
+                        .is_ok();
+                if same {
+                    return Some((tmp, f));
+                }
+                drop(f);
+                let _ = fs::remove_file(&tmp);
+                return None;
+            }
+            Err(e) if e.kind() == io::ErrorKind::AlreadyExists => continue,
+            Err(_) => return None,
+        }
+    }
+    None
 }
 
 pub fn generate_export_command(home: &Path, profile: &str, shell_name: &str) -> String {

@@ -798,3 +798,80 @@ fn rc_bytes_and_line_endings_are_preserved() {
         b"alias a=b\r\n\r\n# Added by AWS Pick\r\nexport AWS_PROFILE=\"prod\"\r\n"
     );
 }
+
+/// 2.x truncated the rc file before writing it, so a write that failed half
+/// way (full disk, quota) left a cut-off rc. The write now goes to a
+/// temporary file that replaces the rc only once it is complete. The
+/// failure is injected with a file size limit; SIGXFSZ is ignored so the
+/// write returns EFBIG instead of killing the process.
+#[test]
+fn failed_write_leaves_rc_intact() {
+    let long = "a".repeat(5000);
+    let h = Home::new(Some(&format!("[profile dev]\n[profile {long}]\n")));
+    let before = "alias a=b\nexport AWS_PROFILE=\"dev\"\n";
+    h.write(".zshrc", before);
+    let mut cmd = Command::new("/bin/sh");
+    cmd.args(["-c", "trap '' XFSZ; ulimit -f 2; exec \"$0\"", BIN])
+        .env_clear()
+        .env("PATH", "/usr/bin:/bin")
+        .env("HOME", &h.path)
+        .env("SHELL", "/bin/zsh")
+        .current_dir(&h.path);
+    let o = run_with(&mut cmd, &format!("{long}\n"));
+    let e = stderr(&o);
+    assert_eq!(o.status.code(), Some(1), "{e}");
+    assert!(
+        e.contains("ERROR: Failed to update AWS profile: [Errno 27] File too large"),
+        "{e}"
+    );
+    assert_eq!(h.read(".zshrc"), before);
+    let leftovers: Vec<String> = fs::read_dir(&h.path)
+        .unwrap()
+        .map(|e| e.unwrap().file_name().to_string_lossy().into_owned())
+        .filter(|n| n.contains("awspick") || n.ends_with(".tmp"))
+        .collect();
+    assert!(leftovers.is_empty(), "{leftovers:?}");
+    assert!(!h.exists(".config/awspick/profile"));
+}
+
+/// The atomic write keeps what the in-place write kept: a symlinked rc stays
+/// a symlink to the same file, and the file keeps its mode. A read-only rc
+/// is still refused rather than replaced.
+#[test]
+fn atomic_write_keeps_symlink_mode_and_permissions() {
+    let h = Home::new(Some(CFG));
+    h.write("dotfiles/zshrc", "export AWS_PROFILE=\"dev\"\n");
+    let target = h.path.join("dotfiles/zshrc");
+    fs::set_permissions(&target, fs::Permissions::from_mode(0o640)).unwrap();
+    std::os::unix::fs::symlink("dotfiles/zshrc", h.path.join(".zshrc")).unwrap();
+    let o = h.run("/bin/zsh", &[], "prod\n");
+    assert_eq!(o.status.code(), Some(0), "{}", stderr(&o));
+    let link = h.path.join(".zshrc");
+    assert!(
+        fs::symlink_metadata(&link)
+            .unwrap()
+            .file_type()
+            .is_symlink()
+    );
+    assert_eq!(fs::read_link(&link).unwrap(), Path::new("dotfiles/zshrc"));
+    assert_eq!(h.read("dotfiles/zshrc"), "export AWS_PROFILE=\"prod\"\n");
+    assert_eq!(
+        fs::metadata(&target).unwrap().permissions().mode() & 0o7777,
+        0o640
+    );
+    let names: Vec<String> = fs::read_dir(h.path.join("dotfiles"))
+        .unwrap()
+        .map(|e| e.unwrap().file_name().to_string_lossy().into_owned())
+        .collect();
+    assert_eq!(names, ["zshrc"]);
+
+    fs::set_permissions(&target, fs::Permissions::from_mode(0o400)).unwrap();
+    let o = h.run("/bin/zsh", &[], "dev\n");
+    assert_eq!(o.status.code(), Some(1));
+    assert!(
+        stderr(&o).contains("[Errno 13] Permission denied"),
+        "{}",
+        stderr(&o)
+    );
+    assert_eq!(h.read("dotfiles/zshrc"), "export AWS_PROFILE=\"prod\"\n");
+}
