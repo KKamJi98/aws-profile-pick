@@ -12,7 +12,7 @@ use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use regex::Regex;
+use regex::bytes::Regex;
 
 use crate::out;
 use crate::py;
@@ -57,24 +57,26 @@ impl ShellConfig {
             // name. 2.x accepted only a single -g or -x, which never matched
             // the `set -gx` line it wrote itself.
             Kind::Fish => {
-                r"(?m)^set(?:[ \t]+(?:-[gx]{1,2}|--global|--export))+[ \t]+AWS_PROFILE[ \t]+(?P<rest>[^\n]*)$"
+                r"(?m)^set(?:[ \t]+(?:-[gx]{1,2}|--global|--export))+[ \t]+AWS_PROFILE[ \t]+(?P<rest>(?-u:[^\r\n])*)"
             }
-            _ => r"(?m)^export[ \t]+AWS_PROFILE=(?P<rest>[^\n]*)$",
+            _ => r"(?m)^export[ \t]+AWS_PROFILE=(?P<rest>(?-u:[^\r\n])*)",
         };
         Regex::new(pattern).expect("static pattern")
     }
 
     /// The AWS_PROFILE assignments awspick manages in `content`: a single
     /// literal word (quoted or not), optionally followed by a `#` comment.
-    /// Values that expand anything (`$`, backticks) are left to the user.
-    pub fn assignments(&self, content: &str) -> Vec<Assignment> {
+    /// Values that expand anything (`$`, backticks) are left to the user,
+    /// and so are lines that are not valid UTF-8. The line ending (LF or
+    /// CRLF) is outside the span, so a rewrite keeps it.
+    pub fn assignments(&self, content: &[u8]) -> Vec<Assignment> {
         self.line_pattern()
             .captures_iter(content)
             .filter_map(|c| {
                 let whole = c.get(0).expect("match");
-                let rest = c.name("rest").expect("group");
-                let (value, len) = scan_word(rest.as_str(), self.kind)?;
-                let tail = &rest.as_str()[len..];
+                let rest = std::str::from_utf8(c.name("rest").expect("group").as_bytes()).ok()?;
+                let (value, len) = scan_word(rest, self.kind)?;
+                let tail = &rest[len..];
                 let comment = py::strip(tail);
                 if !comment.is_empty() && !comment.starts_with('#') {
                     return None;
@@ -412,11 +414,26 @@ fn backup_key(suffix: &str) -> Option<(String, u64)> {
     }
 }
 
-/// Read a text file the way Python's `open(path, "r").read()` did.
-fn read_text(path: &Path) -> Result<String, String> {
-    let bytes = fs::read(path).map_err(|e| py::os_error(&e, path))?;
-    let text = py::decode_utf8(&bytes)?;
-    Ok(py::universal_newlines(&text))
+/// Read the rc file as bytes. 2.x decoded it as UTF-8 with universal
+/// newlines, so one Latin-1 byte made the update fail and CRLF files were
+/// rewritten with LF; awspick now only touches the lines it manages.
+fn read_rc(path: &Path) -> Result<Vec<u8>, String> {
+    fs::read(path).map_err(|e| py::os_error(&e, path))
+}
+
+/// `str.rstrip()` on bytes that may not all be UTF-8: only the text after
+/// the last undecodable byte is stripped.
+fn rstrip_bytes(b: &[u8]) -> &[u8] {
+    let mut start = 0;
+    loop {
+        match std::str::from_utf8(&b[start..]) {
+            Ok(s) => return &b[..start + py::rstrip(s).len()],
+            Err(e) => {
+                start +=
+                    e.valid_up_to() + e.error_len().unwrap_or(b.len() - start - e.valid_up_to());
+            }
+        }
+    }
 }
 
 /// `get_current_profile`: `$AWS_PROFILE`, else the value in the rc file.
@@ -433,7 +450,7 @@ pub fn get_current_profile(home: &Path) -> Option<String> {
     if !config.rc_path.exists() {
         return None;
     }
-    let content = match read_text(&config.rc_path) {
+    let content = match read_rc(&config.rc_path) {
         Ok(c) => c,
         Err(msg) => {
             out::warning(&format!(
@@ -496,7 +513,7 @@ pub fn update_aws_profile(
         out::error(&format!("Failed to update AWS profile: {msg}"));
     };
 
-    let content = match read_text(rc) {
+    let content = match read_rc(rc) {
         Ok(c) => c,
         Err(msg) => {
             fail(&msg);
@@ -524,21 +541,28 @@ pub fn update_aws_profile(
     let line = config.profile_line(profile);
     let new_content = if let Some(cur) = &current {
         // Rewrite every managed line; the new text is inserted literally.
-        let mut replaced = String::with_capacity(content.len() + line.len());
+        let mut replaced = Vec::with_capacity(content.len() + line.len());
         let mut last = 0;
         for a in &assignments {
-            replaced.push_str(&content[last..a.span.start]);
-            replaced.push_str(&line);
-            replaced.push_str(&a.tail);
+            replaced.extend_from_slice(&content[last..a.span.start]);
+            replaced.extend_from_slice(line.as_bytes());
+            replaced.extend_from_slice(a.tail.as_bytes());
             last = a.span.end;
         }
-        replaced.push_str(&content[last..]);
+        replaced.extend_from_slice(&content[last..]);
         out::info(&format!(
             "Replacing existing AWS_PROFILE={cur} with {profile}"
         ));
         replaced
     } else {
-        let appended = format!("{}\n\n# Added by AWS Pick\n{line}\n", py::rstrip(&content));
+        // Follow the file's own line ending.
+        let nl = if content.windows(2).any(|w| w == b"\r\n") {
+            "\r\n"
+        } else {
+            "\n"
+        };
+        let mut appended = rstrip_bytes(&content).to_vec();
+        appended.extend_from_slice(format!("{nl}{nl}# Added by AWS Pick{nl}{line}{nl}").as_bytes());
         out::info(&format!("Adding new AWS_PROFILE={profile} entry"));
         appended
     };
@@ -550,7 +574,7 @@ pub fn update_aws_profile(
         .create(true)
         .truncate(true)
         .open(rc)
-        .and_then(|mut f| f.write_all(new_content.as_bytes()));
+        .and_then(|mut f| f.write_all(&new_content));
     if let Err(e) = written {
         fail(&py::os_error(&e, rc));
         return Err(UpdateError::Failed);
@@ -579,7 +603,7 @@ mod tests {
 
     fn values(kind: Kind, content: &str) -> Vec<(String, String)> {
         cfg(kind)
-            .assignments(content)
+            .assignments(content.as_bytes())
             .into_iter()
             .map(|a| (a.value, a.tail))
             .collect()

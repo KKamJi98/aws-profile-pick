@@ -773,3 +773,28 @@ fn zsh_honours_zdotdir() {
     );
     assert!(!h.exists(".zshrc"));
 }
+
+/// Bug 15: 2.x read the rc file as UTF-8 text, so a Latin-1 byte anywhere
+/// in it made the update fail, and CRLF line endings were rewritten as LF.
+#[test]
+fn rc_bytes_and_line_endings_are_preserved() {
+    let h = Home::new(Some(CFG));
+    let rc = h.path.join(".zshrc");
+    fs::write(
+        &rc,
+        b"alias caf\xe9=b\r\nexport AWS_PROFILE=\"prod\"\r\nx=1\r\n",
+    )
+    .unwrap();
+    let o = h.run("/bin/zsh", &[], "dev\n");
+    assert_eq!(o.status.code(), Some(0), "{}", stderr(&o));
+    assert_eq!(
+        fs::read(&rc).unwrap(),
+        b"alias caf\xe9=b\r\nexport AWS_PROFILE=\"dev\"\r\nx=1\r\n"
+    );
+    fs::write(&rc, b"alias a=b\r\n").unwrap();
+    h.run("/bin/zsh", &[], "prod\n");
+    assert_eq!(
+        fs::read(&rc).unwrap(),
+        b"alias a=b\r\n\r\n# Added by AWS Pick\r\nexport AWS_PROFILE=\"prod\"\r\n"
+    );
+}
