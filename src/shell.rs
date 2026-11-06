@@ -319,7 +319,13 @@ fn copy2(src: &Path, dst: &Path) -> io::Result<()> {
     let data = fs::read(src)?;
     let meta = fs::metadata(src)?;
     {
-        let mut f = OpenOptions::new().write(true).create_new(true).open(dst)?;
+        // Owner-only until the source's mode is applied, so a 0600 rc is
+        // never readable by others through its backup.
+        let mut f = OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .mode(0o600)
+            .open(dst)?;
         f.write_all(&data)?;
     }
     fs::set_permissions(dst, meta.permissions())?;
@@ -358,7 +364,9 @@ pub fn backup_rc_file(rc_path: &Path) -> Result<PathBuf, String> {
 
     // Rotate only the backups awspick names itself: <rc>.bak-<14 digits>,
     // optionally -N. 2.x matched <rc>.bak-* and deleted the user's own
-    // backup files along with its own.
+    // backup files along with its own. The new backup always stays: names
+    // are local time, so after a time zone change older backups can sort
+    // after it.
     let parent = rc_path.parent().unwrap_or(Path::new("."));
     let prefix = format!(
         "{}.bak-",
@@ -373,15 +381,17 @@ pub fn backup_rc_file(rc_path: &Path) -> Result<PathBuf, String> {
             .filter_map(|e| {
                 let name = e.file_name().to_string_lossy().into_owned();
                 let key = backup_key(name.strip_prefix(&prefix)?)?;
-                Some((key, e.path()))
+                let path = e.path();
+                (path != backup).then_some((key, path))
             })
             .collect(),
         Err(_) => Vec::new(),
     };
     backups.sort();
     let backups: Vec<PathBuf> = backups.into_iter().map(|(_, p)| p).collect();
-    if backups.len() > BACKUP_RETENTION_COUNT {
-        let remove = backups.len() - BACKUP_RETENTION_COUNT;
+    let keep_others = BACKUP_RETENTION_COUNT - 1;
+    if backups.len() > keep_others {
+        let remove = backups.len() - keep_others;
         for old in &backups[..remove] {
             match fs::remove_file(old) {
                 Ok(()) => out::info(&format!("Removed old backup {}", old.display())),

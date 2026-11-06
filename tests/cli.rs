@@ -1077,3 +1077,20 @@ fn completions_scripts_parse() {
     let o = run_with(h.quiet_cmd(None).args(["--completions", "tcsh"]), "");
     assert_eq!(o.status.code(), Some(2));
 }
+
+/// Backup names use local time, so after a time zone change (or the DST
+/// fall-back hour) older backups can sort after the new one. Rotation must
+/// never delete the backup it has just made.
+#[test]
+fn rotation_keeps_the_new_backup() {
+    let h = Home::new(Some(CFG));
+    h.write(".zshrc", "export AWS_PROFILE=\"dev\"\n");
+    h.write(".zshrc.bak-29991231235958", "future1\n");
+    h.write(".zshrc.bak-29991231235959", "future2\n");
+    let o = h.run("/bin/zsh", &[], "prod\n");
+    assert_eq!(o.status.code(), Some(0), "{}", stderr(&o));
+    let b = h.backups(".zshrc");
+    assert_eq!(b.len(), 2, "{b:?}");
+    assert_eq!(b[1], ".zshrc.bak-29991231235959");
+    assert_eq!(h.read(&b[0]), "export AWS_PROFILE=\"dev\"\n", "{b:?}");
+}
