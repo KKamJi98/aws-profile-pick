@@ -2,7 +2,7 @@
 name = "awspick"
 # release-please owns this number (release-type: rust). It bumps Cargo.toml
 # and Cargo.lock together in the release PR; do not edit it by hand.
-version = "2.0.2"
+version = "3.0.0"
 edition = "2024"
 rust-version = "1.88"
 description = "Pick an AWS profile from ~/.aws/config and set AWS_PROFILE in your shell"
