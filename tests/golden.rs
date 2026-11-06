@@ -151,7 +151,13 @@ fn run_case(case: &Value) -> Value {
             .unwrap();
         let o = child.wait_with_output().unwrap();
         runs.push(json!({
-            "stdout": String::from_utf8_lossy(&o.stdout).replace(&home_s, "<HOME>"),
+            // The version changes with every release; pinned results must not.
+            "stdout": String::from_utf8_lossy(&o.stdout)
+                .replace(&home_s, "<HOME>")
+                .replace(
+                    concat!("awspick ", env!("CARGO_PKG_VERSION")),
+                    "awspick <VERSION>",
+                ),
             "stderr": String::from_utf8_lossy(&o.stderr).replace(&home_s, "<HOME>"),
             "exit": o.status.code().unwrap_or(-1),
         }));

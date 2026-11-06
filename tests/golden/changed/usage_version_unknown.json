@@ -16,7 +16,7 @@
     {
       "exit": 0,
       "stderr": "",
-      "stdout": "awspick 2.0.2\n"
+      "stdout": "awspick <VERSION>\n"
     }
   ]
 }
