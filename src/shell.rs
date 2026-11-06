@@ -311,6 +311,9 @@ pub fn backup_rc_file(rc_path: &Path) -> Result<PathBuf, String> {
     };
     out::info(&format!("Backup created at {}", backup.display()));
 
+    // Rotate only the backups awspick names itself: <rc>.bak-<14 digits>,
+    // optionally -N. 2.x matched <rc>.bak-* and deleted the user's own
+    // backup files along with its own.
     let parent = rc_path.parent().unwrap_or(Path::new("."));
     let prefix = format!(
         "{}.bak-",
@@ -319,15 +322,19 @@ pub fn backup_rc_file(rc_path: &Path) -> Result<PathBuf, String> {
             .map(|n| n.to_string_lossy())
             .unwrap_or_default()
     );
-    let mut backups: Vec<PathBuf> = match fs::read_dir(parent) {
+    let mut backups: Vec<((String, u64), PathBuf)> = match fs::read_dir(parent) {
         Ok(rd) => rd
             .filter_map(|e| e.ok())
-            .filter(|e| e.file_name().to_string_lossy().starts_with(&prefix))
-            .map(|e| e.path())
+            .filter_map(|e| {
+                let name = e.file_name().to_string_lossy().into_owned();
+                let key = backup_key(name.strip_prefix(&prefix)?)?;
+                Some((key, e.path()))
+            })
             .collect(),
         Err(_) => Vec::new(),
     };
     backups.sort();
+    let backups: Vec<PathBuf> = backups.into_iter().map(|(_, p)| p).collect();
     if backups.len() > BACKUP_RETENTION_COUNT {
         let remove = backups.len() - BACKUP_RETENTION_COUNT;
         for old in &backups[..remove] {
@@ -342,6 +349,25 @@ pub fn backup_rc_file(rc_path: &Path) -> Result<PathBuf, String> {
         }
     }
     Ok(backup)
+}
+
+/// Sort key for an awspick backup suffix (`YYYYmmddHHMMSS` or
+/// `YYYYmmddHHMMSS-N`), or `None` for anything else.
+fn backup_key(suffix: &str) -> Option<(String, u64)> {
+    let (stamp, n) = match suffix.split_once('-') {
+        Some((stamp, n)) => (
+            stamp,
+            n.parse::<u64>()
+                .ok()
+                .filter(|_| n.bytes().all(|b| b.is_ascii_digit()))?,
+        ),
+        None => (suffix, 0),
+    };
+    if stamp.len() == 14 && stamp.bytes().all(|b| b.is_ascii_digit()) {
+        Some((stamp.to_owned(), n))
+    } else {
+        None
+    }
 }
 
 /// Read a text file the way Python's `open(path, "r").read()` did.

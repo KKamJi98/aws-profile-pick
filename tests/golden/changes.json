@@ -1,5 +1,6 @@
 {
  "config_select_spaced_name": "bug 3: names outside [A-Za-z0-9._@+=,:/-] are single-quoted with shell escaping instead of pasted into double quotes",
+ "rc_backup_rotation": "bug 5: rotation only removes awspick's own <rc>.bak-<timestamp>[-N] files",
  "rc_backup_same_second": "bug 4: a backup made in the same second as the previous one gets a -N suffix instead of overwriting it",
  "rc_shell_injection_kept": "bug 3: names outside [A-Za-z0-9._@+=,:/-] are single-quoted with shell escaping instead of pasted into double quotes",
  "shell_fish_repeat_appends": "bug 1: the fish pattern now matches the set -gx line it writes and no longer swallows the newline after it; bug 4: a backup made in the same second as the previous one gets a -N suffix instead of overwriting it",

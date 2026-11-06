@@ -565,3 +565,19 @@ fn backups_in_the_same_second_do_not_overwrite_each_other() {
     assert!(contents.contains(&"ORIGINAL\n".to_owned()), "{contents:?}");
 }
 
+/// Bug 5: rotation deleted every `<rc>.bak-*` file, including ones the user
+/// made by hand.
+#[test]
+fn rotation_leaves_other_backup_files_alone() {
+    let h = Home::new(Some(CFG));
+    h.write(".zshrc", "x\n");
+    h.write(".zshrc.bak-0-before-migration", "MANUAL\n");
+    h.write(".zshrc.bak-tabfix-20260208", "MANUAL2\n");
+    h.write(".zshrc.bak-20240101000000", "old1\n");
+    h.write(".zshrc.bak-20250101000000", "old2\n");
+    h.run("/bin/zsh", &[], "dev\n");
+    assert_eq!(h.read(".zshrc.bak-0-before-migration"), "MANUAL\n");
+    assert_eq!(h.read(".zshrc.bak-tabfix-20260208"), "MANUAL2\n");
+    assert!(!h.exists(".zshrc.bak-20240101000000"));
+    assert!(h.exists(".zshrc.bak-20250101000000"));
+}
