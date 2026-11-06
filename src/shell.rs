@@ -42,10 +42,19 @@ impl ShellConfig {
     }
 
     pub fn profile_line(&self, profile: &str) -> String {
+        let value = quote(profile, self.kind);
         match self.kind {
-            Kind::Fish => format!("set -gx AWS_PROFILE \"{profile}\""),
-            _ => format!("export AWS_PROFILE=\"{profile}\""),
+            Kind::Fish => format!("set -gx AWS_PROFILE {value}"),
+            _ => format!("export AWS_PROFILE={value}"),
         }
+    }
+
+    /// The profile a matched rc value names: the shell word, unquoted, or
+    /// (for values that are not a single word) the 2.x reading, which strips
+    /// surrounding quote characters.
+    pub fn value_of(&self, raw: &str) -> String {
+        let raw = py::strip(raw);
+        shell_word(raw, self.kind).unwrap_or_else(|| raw.trim_matches(['"', '\'']).to_owned())
     }
 
     /// The 2.x patterns, with `\s` widened to Python's whitespace set.
@@ -61,6 +70,71 @@ impl ShellConfig {
         };
         Regex::new(pattern).expect("static pattern")
     }
+}
+
+/// Characters a profile name may contain and still be written the 2.x way,
+/// inside double quotes, without any shell treating them specially.
+fn is_plain(c: char) -> bool {
+    c.is_ascii_alphanumeric() || "._@+=,:/-".contains(c)
+}
+
+/// Quote a profile name for the rc file and the `eval` line. Ordinary names
+/// keep the 2.x form `"name"`; anything else is single-quoted with the
+/// shell's own escaping, so no name can expand or run a command.
+pub fn quote(profile: &str, kind: Kind) -> String {
+    if !profile.is_empty() && profile.chars().all(is_plain) {
+        return format!("\"{profile}\"");
+    }
+    match kind {
+        Kind::Fish => format!("'{}'", profile.replace('\\', "\\\\").replace('\'', "\\'")),
+        _ => format!("'{}'", profile.replace('\'', "'\\''")),
+    }
+}
+
+/// Parse `raw` as exactly one shell word (quotes and escapes resolved).
+/// `None` if it is not a single word or uses expansion.
+fn shell_word(raw: &str, kind: Kind) -> Option<String> {
+    let mut out = String::new();
+    let mut chars = raw.chars().peekable();
+    while let Some(c) = chars.next() {
+        match c {
+            '\'' => loop {
+                match chars.next()? {
+                    '\'' => break,
+                    '\\' if kind == Kind::Fish => match chars.next()? {
+                        e @ ('\\' | '\'') => out.push(e),
+                        e => {
+                            out.push('\\');
+                            out.push(e);
+                        }
+                    },
+                    ch => out.push(ch),
+                }
+            },
+            '"' => loop {
+                match chars.next()? {
+                    '"' => break,
+                    '$' | '`' => return None,
+                    '\\' => match chars.next()? {
+                        e @ ('\\' | '"' | '$' | '`') => out.push(e),
+                        e => {
+                            out.push('\\');
+                            out.push(e);
+                        }
+                    },
+                    ch => out.push(ch),
+                }
+            },
+            '\\' => out.push(chars.next()?),
+            '$' | '`' | '(' | ')' | ';' | '&' | '|' | '<' | '>' | '*' | '?' | '[' | '{' | '~'
+            | '#' => {
+                return None;
+            }
+            c if py::is_space(c) => return None,
+            c => out.push(c),
+        }
+    }
+    Some(out)
 }
 
 /// `detect_shell`: `$SHELL`'s basename, else the parent process name.
@@ -289,12 +363,8 @@ pub fn get_current_profile(home: &Path) -> Option<String> {
         }
     };
     let caps = config.profile_pattern().captures(&content)?;
-    let value = py::strip(&caps[1]).trim_matches(['"', '\'']);
-    if value.is_empty() {
-        None
-    } else {
-        Some(value.to_owned())
-    }
+    let value = config.value_of(&caps[1]);
+    if value.is_empty() { None } else { Some(value) }
 }
 
 pub enum Update {
@@ -354,9 +424,7 @@ pub fn update_aws_profile(
         }
     };
     let pattern = config.profile_pattern();
-    let current = pattern
-        .captures(&content)
-        .map(|c| c[1].trim_matches(['"', '\'']).to_owned());
+    let current = pattern.captures(&content).map(|c| config.value_of(&c[1]));
 
     if current.as_deref() == Some(profile) {
         out::info(&format!(
@@ -448,5 +516,28 @@ mod tests {
         assert!(!p.is_match("  set -gx AWS_PROFILE a"));
         assert!(p.is_match("set -gx AWS_PROFILE \"prod\"\n"));
         assert!(p.is_match("x\n\n# Added by AWS Pick\nset -gx AWS_PROFILE \"prod\"\n"));
+    }
+
+    #[test]
+    fn quoting_round_trips() {
+        for kind in [Kind::Zsh, Kind::Fish] {
+            for name in [
+                "acme-dev", "a b", "it's", "x$(id)", "a\\1", "q\"", "", "back\\'",
+            ] {
+                let q = quote(name, kind);
+                assert_eq!(shell_word(&q, kind).as_deref(), Some(name), "{kind:?} {q}");
+            }
+        }
+        assert_eq!(quote("acme-dev", Kind::Zsh), "\"acme-dev\"");
+        assert_eq!(quote("it's", Kind::Zsh), "'it'\\''s'");
+        assert_eq!(quote("it's", Kind::Fish), "'it\\'s'");
+        assert_eq!(quote("a\\b", Kind::Fish), "'a\\\\b'");
+    }
+
+    #[test]
+    fn values_with_expansion_are_not_words() {
+        assert_eq!(shell_word("\"$(cat f)\"", Kind::Zsh), None);
+        assert_eq!(shell_word("a b", Kind::Zsh), None);
+        assert_eq!(shell_word("acme # c", Kind::Zsh), None);
     }
 }

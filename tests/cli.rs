@@ -483,3 +483,57 @@ fn backslash_in_profile_name_is_written_literally() {
         assert!(!rc.contains("\"d\""), "{rc}");
     }
 }
+
+/// Bug 3: the profile name went unescaped into `"..."`, both in the rc file
+/// and in the line printed for `eval`. A name from ~/.aws/config could run
+/// commands. Profiles are picked by number and checked against the name
+/// awspick reports, so the test does not depend on how section names are
+/// parsed.
+#[test]
+fn profile_names_are_quoted_for_the_shell() {
+    let config = "[profile x$(touch PWNED)]\n[profile y\";touch PWN2;\"]\n[profile it's]\n\
+                  [profile back`touch PWN3`]\n[profile \"a b\"]\n[profile c\\d]\n";
+    let h = Home::new(Some(config));
+    for n in 1..=6 {
+        h.write(".zshrc", "");
+        let o = h.run("/bin/zsh", &[], &format!("{n}\n"));
+        assert_eq!(o.status.code(), Some(0), "{n}: {}", stderr(&o));
+        let e = stderr(&o);
+        let name = e
+            .lines()
+            .find_map(|l| l.split_once("Selected profile: ").map(|(_, n)| n))
+            .unwrap()
+            .to_owned();
+        // eval the printed line and source the rc file in a POSIX shell.
+        for script in [
+            format!(
+                "eval {}; printf %s \"$AWS_PROFILE\"",
+                shell_quote(stdout(&o).trim_end())
+            ),
+            ". ./.zshrc; printf %s \"$AWS_PROFILE\"".to_owned(),
+        ] {
+            let out = Command::new("/bin/sh")
+                .arg("-c")
+                .arg(&script)
+                .current_dir(&h.path)
+                .output()
+                .unwrap();
+            assert_eq!(String::from_utf8_lossy(&out.stdout), name, "{script}");
+        }
+        for f in ["PWNED", "PWN2", "PWN3"] {
+            assert!(!h.exists(f), "{name} ran a command");
+        }
+        // Selecting the same profile again is recognised as no change.
+        let again = h.run("/bin/zsh", &[], &format!("{n}\n"));
+        assert!(
+            stderr(&again).contains("no changes needed"),
+            "{name}: {}",
+            stderr(&again)
+        );
+    }
+}
+
+/// Single-quote a string for /bin/sh.
+fn shell_quote(s: &str) -> String {
+    format!("'{}'", s.replace('\'', "'\\''"))
+}
