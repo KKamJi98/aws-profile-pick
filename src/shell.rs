@@ -229,9 +229,13 @@ pub fn shell_configs(home: &Path) -> [ShellConfig; 3] {
             kind: Kind::Bash,
             rc_path: home.join(".bashrc"),
         },
+        // zsh reads $ZDOTDIR/.zshrc when ZDOTDIR is set; 2.x ignored it.
         ShellConfig {
             kind: Kind::Zsh,
-            rc_path: home.join(".zshrc"),
+            rc_path: match std::env::var_os("ZDOTDIR").filter(|d| !d.is_empty()) {
+                Some(dir) => PathBuf::from(dir).join(".zshrc"),
+                None => home.join(".zshrc"),
+            },
         },
         ShellConfig {
             kind: Kind::Fish,

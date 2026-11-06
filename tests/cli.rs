@@ -755,3 +755,21 @@ fn profiles_follow_the_aws_cli() {
         assert_eq!(cli, names, "aws configure list-profiles");
     }
 }
+
+/// Bug 14: zsh reads $ZDOTDIR/.zshrc when ZDOTDIR is set; 2.x always used
+/// ~/.zshrc.
+#[test]
+fn zsh_honours_zdotdir() {
+    let h = Home::new(Some(CFG));
+    h.write("zdot/.zshrc", "alias a=b\n");
+    let o = run_with(
+        h.cmd(Some("/bin/zsh")).env("ZDOTDIR", h.path.join("zdot")),
+        "dev\n",
+    );
+    assert_eq!(o.status.code(), Some(0), "{}", stderr(&o));
+    assert!(
+        h.read("zdot/.zshrc")
+            .ends_with("export AWS_PROFILE=\"dev\"\n")
+    );
+    assert!(!h.exists(".zshrc"));
+}
