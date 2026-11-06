@@ -1,4 +1,12 @@
 # Changelog
+## [3.0.1](https://github.com/KKamJi98/aws-profile-pick/compare/v3.0.0...v3.0.1) (2026-11-06)
+
+
+### Bug Fixes
+
+* **release:** install shell completions with the Homebrew formula ([#22](https://github.com/KKamJi98/aws-profile-pick/issues/22)) ([17ffbe1](https://github.com/KKamJi98/aws-profile-pick/commit/17ffbe1d02407c24d7e50aee72b7379796e89ccf))
+* **release:** see a new formula file in an empty tap ([#24](https://github.com/KKamJi98/aws-profile-pick/issues/24)) ([2fcc23d](https://github.com/KKamJi98/aws-profile-pick/commit/2fcc23d6a59c76419bc7aa134ee468f365a58879))
+
 ## [3.0.0](https://github.com/KKamJi98/aws-profile-pick/compare/v2.0.2...v3.0.0) (2026-11-06)
 
 
