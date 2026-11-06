@@ -1,4 +1,11 @@
 # Changelog
+## [3.0.2](https://github.com/KKamJi98/aws-profile-pick/compare/v3.0.1...v3.0.2) (2026-11-06)
+
+
+### Documentation
+
+* showcase grouped AWS profiles with a safe demo ([c5e6a71](https://github.com/KKamJi98/aws-profile-pick/commit/c5e6a7182991ce241607cd7b2fe312c710b0afaf))
+
 ## [3.0.1](https://github.com/KKamJi98/aws-profile-pick/compare/v3.0.0...v3.0.1) (2026-11-06)
 
 
