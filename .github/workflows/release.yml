@@ -233,6 +233,10 @@ jobs:
     needs: [check, release]
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    # Tag-only environment, as for crates-io. Moving HOMEBREW_TAP_DEPLOY_KEY
+    # from a repository secret to a `release` environment secret would limit
+    # it to these jobs.
+    environment: release
     permissions:
       contents: read
     steps:
