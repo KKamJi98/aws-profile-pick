@@ -6,7 +6,7 @@
  "config_section_edge_cases": "bug 13: section names follow the AWS CLI (shlex-split [profile ...], [default] and [profile default] are one profile)",
  "config_select_spaced_name": "bug 3: names outside [A-Za-z0-9._@+=,:/-] are single-quoted with shell escaping instead of pasted into double quotes; bug 13: section names follow the AWS CLI (shlex-split [profile ...], [default] and [profile default] are one profile)",
  "filter_regex_invalid": "bug 7: an invalid --regex pattern is reported as 'invalid regex' instead of a traceback",
- "help_without_config": "bug 12: arguments are parsed before ~/.aws/config is read, so --help and usage errors work without a config; P1: -V/--version prints 'awspick <version>'; P1: INFO lines need -v/--verbose; the golden runner passes -v, which clap echoes in usage errors and help; P1: a positional PROFILE switches without the prompt; an unknown name exits 1",
+ "help_without_config": "bug 12: arguments are parsed before ~/.aws/config is read, so --help and usage errors work without a config; P1: -V/--version prints 'awspick <version>'; P1: INFO lines need -v/--verbose; the golden runner passes -v, which clap echoes in usage errors and help; P1: a positional PROFILE switches without the prompt; an unknown name exits 1; P1: --completions <bash|zsh|fish>",
  "rc_backup_rotation": "bug 5: rotation only removes awspick's own <rc>.bak-<timestamp>[-N] files",
  "rc_backup_same_second": "bug 4: a backup made in the same second as the previous one gets a -N suffix instead of overwriting it",
  "rc_crlf": "bug 15: rc file is edited as bytes; CRLF and non-UTF-8 lines are kept",

@@ -425,6 +425,7 @@ fn help_lists_every_option() {
         "-v, --verbose",
         "-V, --version",
         "[PROFILE]",
+        "--completions <SHELL>",
         "AWS profile picker",
     ] {
         assert!(out.contains(opt), "missing {opt}:\n{out}");
@@ -1045,4 +1046,34 @@ fn credentials_file_profiles_are_listed() {
     );
     assert!(!e.contains("SECRETVALUE"), "{e}");
     assert_eq!(names(&o), ["a"]);
+}
+
+/// `--completions <shell>` prints a script the shell accepts, without
+/// needing a config file.
+#[test]
+fn completions_scripts_parse() {
+    let h = Home::new(None);
+    for (shell, marker, check) in [
+        ("bash", "_awspick()", "/bin/bash"),
+        ("zsh", "#compdef awspick", "/bin/zsh"),
+        ("fish", "complete -c awspick", "fish"),
+    ] {
+        let o = run_with(h.quiet_cmd(None).args(["--completions", shell]), "");
+        assert_eq!(o.status.code(), Some(0), "{shell}: {}", stderr(&o));
+        assert_eq!(stderr(&o), "");
+        let script = stdout(&o);
+        assert!(script.contains(marker), "{shell}:\n{script}");
+        assert!(
+            script.contains("filter") && script.contains("completions"),
+            "{shell}"
+        );
+        // Syntax check where the shell is installed (fish usually is not on CI).
+        let path = h.path.join(format!("awspick.{shell}"));
+        fs::write(&path, &script).unwrap();
+        if let Ok(st) = Command::new(check).arg("-n").arg(&path).status() {
+            assert!(st.success(), "{shell} -n rejected the script");
+        }
+    }
+    let o = run_with(h.quiet_cmd(None).args(["--completions", "tcsh"]), "");
+    assert_eq!(o.status.code(), Some(2));
 }

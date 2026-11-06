@@ -40,6 +40,13 @@ pub fn error(s: &str) {
     eprintln(&format!("ERROR: {s}"));
 }
 
+/// Write raw bytes to stdout. EPIPE and other write errors are swallowed.
+pub fn print_bytes(b: &[u8]) {
+    let mut o = io::stdout().lock();
+    let _ = o.write_all(b);
+    let _ = o.flush();
+}
+
 /// Print one line to stdout. EPIPE and other write errors are swallowed.
 pub fn println(s: &str) {
     let mut o = io::stdout().lock();

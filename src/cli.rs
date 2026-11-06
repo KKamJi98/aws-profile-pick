@@ -5,7 +5,7 @@ use std::io::{self, BufRead};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 
-use clap::{ArgAction, Parser};
+use clap::{ArgAction, CommandFactory, Parser, ValueEnum};
 
 use crate::config::{self, GroupOptions};
 use crate::out;
@@ -70,6 +70,28 @@ pub struct Cli {
     /// Print INFO log lines on stderr
     #[arg(short = 'v', long)]
     verbose: bool,
+
+    /// Print a completion script for SHELL and exit
+    #[arg(long, value_name = "SHELL", value_enum)]
+    completions: Option<CompletionShell>,
+}
+
+#[derive(Clone, Copy, Debug, ValueEnum)]
+enum CompletionShell {
+    Bash,
+    Zsh,
+    Fish,
+}
+
+fn print_completions(shell: CompletionShell) {
+    let shell = match shell {
+        CompletionShell::Bash => clap_complete::Shell::Bash,
+        CompletionShell::Zsh => clap_complete::Shell::Zsh,
+        CompletionShell::Fish => clap_complete::Shell::Fish,
+    };
+    let mut script = Vec::new();
+    clap_complete::generate(shell, &mut Cli::command(), "awspick", &mut script);
+    out::print_bytes(&script);
 }
 
 static IN_PROMPT: AtomicBool = AtomicBool::new(false);
@@ -205,6 +227,10 @@ fn run_with_home(home: &Path) -> i32 {
         }
     };
     out::set_verbose(args.verbose);
+    if let Some(shell) = args.completions {
+        print_completions(shell);
+        return 0;
+    }
 
     let profiles = config::read_aws_profiles(home);
     if profiles.is_empty() {
