@@ -184,13 +184,8 @@ pub fn run() -> i32 {
 }
 
 fn run_with_home(home: &Path) -> i32 {
-    // 2.x read the config before it parsed the arguments.
-    let profiles = config::read_aws_profiles(&config::aws_config_path(home));
-    if profiles.is_empty() {
-        out::error("No AWS profiles found. Please check your AWS configuration.");
-        return 1;
-    }
-
+    // Arguments first, so --help and usage errors work without a config.
+    // 2.x read the config first.
     let args = match Cli::try_parse() {
         Ok(a) => a,
         Err(e) => {
@@ -199,6 +194,12 @@ fn run_with_home(home: &Path) -> i32 {
             return code;
         }
     };
+
+    let profiles = config::read_aws_profiles(&config::aws_config_path(home));
+    if profiles.is_empty() {
+        out::error("No AWS profiles found. Please check your AWS configuration.");
+        return 1;
+    }
 
     let include = {
         let v = split_csv_many(&args.filter);

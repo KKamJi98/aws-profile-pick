@@ -690,3 +690,15 @@ fn only_literal_assignments_are_managed() {
         "export AWS_PROFILE=`cat f`\nexport AWS_PROFILE=\"dev\"\n"
     );
 }
+
+/// Bug 12: the config was read before the arguments, so `--help` without a
+/// ~/.aws/config printed config errors and exited 1.
+#[test]
+fn help_and_usage_errors_do_not_need_a_config() {
+    let h = Home::new(None);
+    let o = h.run("/bin/zsh", &["--help"], "");
+    assert_eq!(o.status.code(), Some(0));
+    assert!(stdout(&o).contains("--filter"));
+    assert!(stderr(&o).is_empty(), "{}", stderr(&o));
+    assert_eq!(h.run("/bin/zsh", &["--bogus"], "").status.code(), Some(2));
+}

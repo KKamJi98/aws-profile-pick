@@ -1,0 +1,10 @@
+{
+  "files": [],
+  "runs": [
+    {
+      "exit": 0,
+      "stderr": "",
+      "stdout": "AWS profile picker\n\nUsage: awspick [OPTIONS]\n\nOptions:\n  -f, --filter <FILTER>            Only show profiles that match any of these substrings (can repeat or comma-separate)\n  -x, --exclude <EXCLUDE>          Exclude profiles that match any of these substrings (can repeat or comma-separate)\n  -g, --groups <GROUPS>            Comma-separated group names to display (e.g., prod,dev)\n      --group-rules <GROUP_RULES>  Custom group rules, e.g. 'preprod=preprod;prod=prod,production;dev=dev' (order matters)\n      --regex                      Treat filter/exclude as regular expressions\n      --case-sensitive             Make filter/exclude matching case-sensitive\n  -h, --help                       Print help\n"
+    }
+  ]
+}
