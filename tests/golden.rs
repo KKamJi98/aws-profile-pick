@@ -205,13 +205,37 @@ fn select(v: &Value, compare: &[String]) -> Value {
     Value::Object(m)
 }
 
+const ALL: [&str; 4] = ["stdout", "stderr", "exit", "files"];
+
+/// Cases whose Rust output deliberately differs from 2.0.2 (bug fixes), with
+/// the reason. Their Rust output is pinned in tests/golden/changed/.
+fn changes() -> BTreeMap<String, String> {
+    let path = golden_dir().join("changes.json");
+    match fs::read_to_string(path) {
+        Ok(s) => serde_json::from_str(&s).unwrap(),
+        Err(_) => BTreeMap::new(),
+    }
+}
+
+/// Compares every case with the Python release, except the ones listed in
+/// changes.json, which are compared with their pinned Rust output instead
+/// (`GOLDEN_BLESS=1 cargo test --test golden` rewrites those pins).
 #[test]
 fn golden_fixtures_match_python_release() {
     let cases: Vec<Value> =
         serde_json::from_str(&fs::read_to_string(golden_dir().join("cases.json")).unwrap())
             .unwrap();
+    let changes = changes();
+    let bless = std::env::var_os("GOLDEN_BLESS").is_some();
     let only = std::env::var("GOLDEN_CASE").ok();
+    let all: Vec<String> = ALL.iter().map(|s| (*s).to_owned()).collect();
     let mut failures = Vec::new();
+    for name in changes.keys() {
+        assert!(
+            cases.iter().any(|c| c["name"] == json!(name)),
+            "changes.json names unknown case {name}"
+        );
+    }
     for case in &cases {
         let name = case["name"].as_str().unwrap();
         if only.as_deref().is_some_and(|o| o != name) {
@@ -231,6 +255,28 @@ fn golden_fixtures_match_python_release() {
         let actual = run_case(case);
         for r in actual["runs"].as_array().unwrap() {
             assert_ne!(r["exit"], json!(101), "{name}: the binary panicked");
+        }
+        if changes.contains_key(name) {
+            let pinned_path = golden_dir().join("changed").join(format!("{name}.json"));
+            let a = normalize(&select(&actual, &all), case);
+            if normalize(&select(&expected, &all), case) == a {
+                failures.push(format!(
+                    "--- {name}\nlisted in changes.json but matches 2.0.2"
+                ));
+                continue;
+            }
+            if bless {
+                fs::create_dir_all(pinned_path.parent().unwrap()).unwrap();
+                fs::write(&pinned_path, format!("{a}\n")).unwrap();
+                continue;
+            }
+            let pinned = fs::read_to_string(&pinned_path).unwrap_or_default();
+            if pinned.trim_end() != a {
+                failures.push(format!(
+                    "--- {name} (changed)\npinned:\n{pinned}\nactual:\n{a}"
+                ));
+            }
+            continue;
         }
         let e = normalize(&select(&expected, &compare), case);
         let a = normalize(&select(&actual, &compare), case);
