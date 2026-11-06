@@ -433,3 +433,34 @@ fn usage_errors_exit_2() {
     }
 }
 
+// --- Phase 3 bug fixes ----------------------------------------------------
+
+fn count(haystack: &str, needle: &str) -> usize {
+    haystack.matches(needle).count()
+}
+
+/// Bug 1: the fish pattern never matched the `set -gx` line awspick writes,
+/// so every switch appended another block.
+#[test]
+fn fish_switch_replaces_the_existing_line() {
+    let h = Home::new(Some(CFG));
+    h.write(".config/fish/config.fish", "set -gx PATH x\n");
+    h.run("/usr/bin/fish", &[], "prod\n");
+    h.run("/usr/bin/fish", &[], "dev\n");
+    let rc = h.read(".config/fish/config.fish");
+    assert_eq!(count(&rc, "AWS_PROFILE"), 1, "{rc}");
+    assert!(rc.contains("set -gx AWS_PROFILE \"dev\""), "{rc}");
+    // The value in config.fish is recognised as the current profile.
+    let e = stderr(&h.run("/usr/bin/fish", &[], "q\n"));
+    let line = e.lines().find(|l| l.contains(" dev ")).unwrap();
+    assert!(line.contains('*'), "{line}");
+    for flags in ["-x", "-g", "-xg", "--global --export"] {
+        h.write(
+            ".config/fish/config.fish",
+            &format!("set {flags} AWS_PROFILE prod\n"),
+        );
+        h.run("/usr/bin/fish", &[], "dev\n");
+        let rc = h.read(".config/fish/config.fish");
+        assert_eq!(rc, "set -gx AWS_PROFILE \"dev\"\n", "{flags}");
+    }
+}

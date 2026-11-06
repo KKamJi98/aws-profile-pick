@@ -1,0 +1,55 @@
+{
+  "files": [
+    {
+      "mode": "755",
+      "path": ".aws",
+      "type": "dir"
+    },
+    {
+      "content": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+      "mode": "644",
+      "path": ".aws/config",
+      "type": "file"
+    },
+    {
+      "mode": "755",
+      "path": ".config",
+      "type": "dir"
+    },
+    {
+      "mode": "755",
+      "path": ".config/awspick",
+      "type": "dir"
+    },
+    {
+      "content": "acme-dev\n",
+      "mode": "644",
+      "path": ".config/awspick/profile",
+      "type": "file"
+    },
+    {
+      "mode": "755",
+      "path": ".config/fish",
+      "type": "dir"
+    },
+    {
+      "content": "set -gx AWS_PROFILE \"acme-dev\"\n",
+      "mode": "644",
+      "path": ".config/fish/config.fish",
+      "type": "file"
+    },
+    {
+      "content": "set -x AWS_PROFILE 'acme-prod'\n",
+      "mode": "644",
+      "path": ".config/fish/config.fish.bak-<TS1>",
+      "type": "file"
+    }
+  ],
+  "runs": [
+    {
+      "exit": 0,
+      "stderr": "INFO: Found 8 AWS profiles\nINFO: Detected shell from SHELL env var: fish\nINFO: Using fish configuration at <HOME>/.config/fish/config.fish\n                AWS Profiles                \n┏━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━┓\n┃ No. ┃ Profile         ┃ Group  ┃ Current ┃\n┡━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━┩\n│   1 │ acme-prod       │ prod   │    *    │\n│   2 │ acme-prod-admin │ prod   │         │\n├─────┼─────────────────┼────────┼─────────┤\n│   3 │ acme-stg        │ stg    │         │\n│   4 │ acme-stg-admin  │ stg    │         │\n├─────┼─────────────────┼────────┼─────────┤\n│   5 │ acme-dev        │ dev    │         │\n│   6 │ acme-dev-admin  │ dev    │         │\n├─────┼─────────────────┼────────┼─────────┤\n│   7 │ default         │ others │         │\n│   8 │ sandbox         │ others │         │\n└─────┴─────────────────┴────────┴─────────┘\nEnter profile number or name: Selected profile: acme-dev\nINFO: Detected shell from SHELL env var: fish\nINFO: Using fish configuration at <HOME>/.config/fish/config.fish\nINFO: Using fish configuration at <HOME>/.config/fish/config.fish\nINFO: Backup created at <HOME>/.config/fish/config.fish.bak-<TS1>\nINFO: Replacing existing AWS_PROFILE=acme-prod with acme-dev\nINFO: Successfully updated <HOME>/.config/fish/config.fish with AWS_PROFILE=acme-dev\nBackup created at <HOME>/.config/fish/config.fish.bak-<TS1>\nUpdated <HOME>/.config/fish/config.fish with AWS_PROFILE=acme-dev\nINFO: Wrote shared profile to <HOME>/.config/awspick/profile\nUpdated shared profile at <HOME>/.config/awspick/profile\nINFO: Using fish configuration at <HOME>/.config/fish/config.fish\nRun 'eval \"$(awspick)\"' to apply in the current shell\n",
+      "stdout": "set -gx AWS_PROFILE \"acme-dev\"\n"
+    }
+  ]
+}

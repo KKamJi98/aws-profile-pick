@@ -51,8 +51,11 @@ impl ShellConfig {
     /// The 2.x patterns, with `\s` widened to Python's whitespace set.
     pub fn profile_pattern(&self) -> Regex {
         let pattern = match self.kind {
+            // `set` with any mix of -g/-x/-gx/-xg/--global/--export before the
+            // name. 2.x accepted only a single -g or -x, which never matched
+            // the `set -gx` line it wrote itself.
             Kind::Fish => {
-                r#"(?m)^set -[gx] AWS_PROFILE[\s\x1c-\x1f]+["']?(.+?)["']?[\s\x1c-\x1f]*$"#
+                r#"(?m)^set(?:[ \t]+(?:-[gx]{1,2}|--global|--export))+[ \t]+AWS_PROFILE[ \t]+["']?(.+?)["']?[ \t]*$"#
             }
             _ => r"(?m)^export[\s\x1c-\x1f]+AWS_PROFILE=(.+)$",
         };
@@ -436,10 +439,14 @@ mod tests {
     }
 
     #[test]
-    fn fish_pattern_keeps_the_2x_behaviour() {
-        // The written line uses -gx, which this pattern does not match.
+    fn fish_pattern_matches_the_line_it_writes() {
         let p = cfg(Kind::Fish).profile_pattern();
-        assert!(!p.is_match("set -gx AWS_PROFILE \"a\""));
-        assert!(p.is_match("set -x AWS_PROFILE \"a\""));
+        assert!(p.is_match("set -gx AWS_PROFILE \"a\""));
+        assert!(p.is_match("set --global --export AWS_PROFILE a"));
+        assert!(p.is_match("set -x AWS_PROFILE 'a'"));
+        assert!(!p.is_match("set -gx AWS_PROFILE_X a"));
+        assert!(!p.is_match("  set -gx AWS_PROFILE a"));
+        assert!(p.is_match("set -gx AWS_PROFILE \"prod\"\n"));
+        assert!(p.is_match("x\n\n# Added by AWS Pick\nset -gx AWS_PROFILE \"prod\"\n"));
     }
 }
