@@ -1,0 +1,22 @@
+{
+ "runs": [
+  {
+   "stdout": "",
+   "stderr": "INFO: Found 8 AWS profiles\nINFO: Detected shell from SHELL env var: zsh\nINFO: Using zsh configuration at <HOME>/.zshrc\n                AWS Profiles                \n┏━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━┓\n┃ No. ┃ Profile         ┃ Group  ┃ Current ┃\n┡━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━┩\n│   1 │ acme-prod       │ prod   │         │\n│   2 │ acme-prod-admin │ prod   │         │\n├─────┼─────────────────┼────────┼─────────┤\n│   3 │ acme-stg        │ stg    │         │\n│   4 │ acme-stg-admin  │ stg    │         │\n├─────┼─────────────────┼────────┼─────────┤\n│   5 │ acme-dev        │ dev    │         │\n│   6 │ acme-dev-admin  │ dev    │         │\n├─────┼─────────────────┼────────┼─────────┤\n│   7 │ default         │ others │         │\n│   8 │ sandbox         │ others │         │\n└─────┴─────────────────┴────────┴─────────┘\nEnter profile number or name: Selected profile: acme-prod\nINFO: Detected shell from SHELL env var: zsh\nINFO: Using zsh configuration at <HOME>/.zshrc\nINFO: Using zsh configuration at <HOME>/.zshrc\nERROR: Shell config file not found at <HOME>/.zshrc\nERROR: Failed to update AWS profile.\n",
+   "exit": 1
+  }
+ ],
+ "files": [
+  {
+   "path": ".aws",
+   "type": "dir",
+   "mode": "755"
+  },
+  {
+   "path": ".aws/config",
+   "type": "file",
+   "mode": "644",
+   "content": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n"
+  }
+ ]
+}

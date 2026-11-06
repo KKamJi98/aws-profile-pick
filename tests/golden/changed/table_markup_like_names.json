@@ -1,0 +1,28 @@
+{
+  "files": [
+    {
+      "mode": "755",
+      "path": ".aws",
+      "type": "dir"
+    },
+    {
+      "content": "[profile team[red]x]\n[profile a[/b]]\n[profile a[b]]\n[profile ok]\n",
+      "mode": "644",
+      "path": ".aws/config",
+      "type": "file"
+    },
+    {
+      "content": "",
+      "mode": "644",
+      "path": ".zshrc",
+      "type": "file"
+    }
+  ],
+  "runs": [
+    {
+      "exit": 1,
+      "stderr": "INFO: Found 4 AWS profiles\nINFO: Detected shell from SHELL env var: zsh\nINFO: Using zsh configuration at <HOME>/.zshrc\n             AWS Profiles              \n┏━━━━━┳━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━┓\n┃ No. ┃ Profile    ┃ Group  ┃ Current ┃\n┡━━━━━╇━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━┩\n│   1 │ a[/b]      │ others │         │\n│   2 │ a[b]       │ others │         │\n│   3 │ ok         │ others │         │\n│   4 │ team[red]x │ others │         │\n└─────┴────────────┴────────┴─────────┘\nEnter profile number or name: INFO: User cancelled profile selection\nINFO: No profile selected, exiting\n",
+      "stdout": ""
+    }
+  ]
+}

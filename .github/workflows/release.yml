@@ -1,120 +1,305 @@
-# Everything a release touches, from the version bump to the upload.
+# Build and publish a release that release-please has tagged (v1.2.3):
 #
-# The trigger is a push to main rather than a tag, and that is not a preference.
-# The release is driven off release-please's own release_created output, the
-# shape it documents, so build and publish run in the same run that cut the
-# release and nothing waits on a second workflow.
+#   check     the run is on a v* tag that matches Cargo.toml and is on main
+#   build     four targets, one archive + .sha256 each
+#   release   attach the archives, SHA256SUMS and build provenance
+#             attestations to the GitHub release release-please created
+#   crates-io cargo publish through crates.io Trusted Publishing (OIDC)
+#   homebrew  Formula/awspick.rb in KKamJi98/homebrew-tap, pushed with a
+#             deploy key
 #
-# release-please runs on a short-lived GitHub App installation token, not the
-# default GITHUB_TOKEN. GitHub holds pull_request runs on a PR that
-# GITHUB_TOKEN opened or updated (action_required, zero jobs) and expires them
-# as failures after 30 days, so the release PR never got CI. The App token
-# lifts that. It also means the tag and the GitHub release now raise events
-# that do start workflows: do not add a `push: tags` or `release` trigger that
-# publishes, or every release goes to PyPI twice. No long-lived PAT is used.
+# The tag is created by release-please (release-please.yml) with a GitHub App
+# token, which is what lets its push start this workflow. workflow_dispatch is
+# the fallback if that ever does not happen: dispatch it on the tag
+# (`gh workflow run release.yml --ref v1.2.3`); the check job refuses any
+# other ref. Every job starts from `permissions: {}` and asks only for what it
+# uses. `pull_request_target` and `workflow_run` must never trigger this file:
+# crates.io Trusted Publishing refuses tokens from those events.
 name: release
 
 on:
   push:
-    branches:
-      - main
+    tags: ["v*"]
+  workflow_dispatch:
 
 permissions: {}
 
 concurrency:
-  group: release
+  group: release-${{ github.ref }}
   cancel-in-progress: false
 
+env:
+  CARGO_TERM_COLOR: always
+
 jobs:
-  # main skips CI, so the gate lives here. A release must not go out on code that
-  # was never run, and a direct push to main would otherwise reach the publish
-  # job having been checked by nothing.
-  test:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
-        with:
-          python-version: '3.11'
-
-      - name: Test
-        run: uv run --extra dev pytest -q
-
-      - name: Lint
-        run: |
-          uv run --extra dev ruff check .
-          uv run --extra dev ruff format --check .
-
-  # Every write here goes through the App token, so GITHUB_TOKEN gets nothing.
-  # The token is scoped to this repository (no owner/repositories input) and to
-  # the two permissions release-please needs: contents for the release commit,
-  # tag and GitHub release, pull-requests for the release PR and its labels.
-  release-please:
-    needs: test
+  check:
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    permissions: {}
-    outputs:
-      release_created: ${{ steps.release.outputs.release_created }}
-    steps:
-      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
-        id: app-token
-        with:
-          client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
-          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
-          permission-contents: write
-          permission-pull-requests: write
-
-      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
-        id: release
-        with:
-          token: ${{ steps.app-token.outputs.token }}
-          release-type: python
-
-  # release-please tags the very commit this run is building, so a plain checkout
-  # is already at the released code. Nothing reads the tag name into a ref.
-  #
-  # The tag-versus-pyproject guard the hand-tagged repositories carry is absent
-  # on purpose: release-please writes both numbers from one source and they
-  # cannot drift apart.
-  build:
-    needs: release-please
-    if: needs.release-please.outputs.release_created == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
     permissions:
       contents: read
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
 
-      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - id: version
+        name: tag matches Cargo.toml and is on main
+        env:
+          REF: ${{ github.ref }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          if [[ "${REF}" != refs/tags/v* ]]; then
+            echo "release.yml must run on a v* tag, not ${REF}" >&2
+            exit 1
+          fi
+          crate="$(cargo metadata --no-deps --format-version 1 --locked \
+            | jq -r '.packages[] | select(.name == "awspick") | .version')"
+          tag="${REF_NAME#v}"
+          if [[ "${crate}" != "${tag}" ]]; then
+            echo "tag ${tag} does not match Cargo.toml version ${crate}" >&2
+            exit 1
+          fi
+          if ! git merge-base --is-ancestor "${GITHUB_SHA}" origin/main; then
+            echo "tag ${REF_NAME} points at ${GITHUB_SHA}, which is not on main" >&2
+            exit 1
+          fi
+          echo "version=${crate}" >> "${GITHUB_OUTPUT}"
 
-      - run: uv build
+  build:
+    needs: check
+    name: build (${{ matrix.target }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: true
+      matrix:
+        # No Windows target: awspick only knows bash, zsh and fish.
+        include:
+          - { target: aarch64-apple-darwin, os: macos-latest }
+          - { target: x86_64-apple-darwin, os: macos-latest }
+          - { target: x86_64-unknown-linux-musl, os: ubuntu-latest }
+          - { target: aarch64-unknown-linux-musl, os: ubuntu-24.04-arm }
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: install toolchain
+        env:
+          TARGET: ${{ matrix.target }}
+        run: |
+          rustup toolchain install stable --profile minimal --target "${TARGET}"
+          rustup default stable
+
+      - name: install musl tools
+        if: contains(matrix.target, 'linux-musl')
+        run: sudo apt-get update && sudo apt-get install -y musl-tools
+
+      - name: build
+        env:
+          TARGET: ${{ matrix.target }}
+        run: cargo build --release --locked --target "${TARGET}"
+
+      - name: package
+        env:
+          TARGET: ${{ matrix.target }}
+          VERSION: ${{ needs.check.outputs.version }}
+        run: |
+          archive="awspick-${VERSION}-${TARGET}.tar.gz"
+          stage="$(mktemp -d)"
+          mkdir -p dist
+          cp LICENSE README.md "target/${TARGET}/release/awspick" "${stage}/"
+          tar -C "${stage}" -czf "dist/${archive}" awspick LICENSE README.md
+          cd dist
+          if command -v sha256sum >/dev/null; then
+            sha256sum "${archive}" > "${archive}.sha256"
+          else
+            shasum -a 256 "${archive}" > "${archive}.sha256"
+          fi
+          cat "${archive}.sha256"
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: dist
+          name: dist-${{ matrix.target }}
           path: dist/
+          if-no-files-found: error
 
-  # PyPI Trusted Publishing: the job mints an OIDC token that PyPI exchanges for
-  # a short-lived upload token, so there is no API token in Secrets to leak or
-  # rotate. id-token: write is what allows the mint and the only permission here.
-  publish:
-    needs: [release-please, build]
-    if: needs.release-please.outputs.release_created == 'true'
+  release:
+    needs: [check, build]
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    environment: pypi
     permissions:
+      contents: write
       id-token: write
+      attestations: write
     steps:
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
-          name: dist
+          pattern: dist-*
           path: dist/
+          merge-multiple: true
 
-      - uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
+      - name: combined checksums
+        run: |
+          cd dist
+          cat ./*.sha256 | sort -k 2 > SHA256SUMS
+          sha256sum --check SHA256SUMS
+
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-checksums: dist/SHA256SUMS
+
+      # release-please created the release together with the tag. It is
+      # normally visible by now; wait briefly rather than create a second one.
+      - name: attach assets to the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          for attempt in 1 2 3 4 5 6; do
+            if gh release view "${TAG}" >/dev/null 2>&1; then
+              gh release upload "${TAG}" dist/*.tar.gz dist/*.sha256 dist/SHA256SUMS --clobber
+              exit 0
+            fi
+            echo "release ${TAG} not visible yet (attempt ${attempt})"
+            sleep 10
+          done
+          echo "GitHub release ${TAG} does not exist; release-please should have created it" >&2
+          exit 1
+
+  crates-io:
+    needs: [check, release]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # The `release` environment only admits v* tags; it is also the
+    # environment named in the crates.io Trusted Publisher configuration.
+    environment: release
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Trusted Publishing only works for a crate that already exists, so the
+      # first version of awspick is published by hand (`cargo publish`). This
+      # job skips, instead of failing, while the crate does not exist yet or
+      # when this version is already there.
+      - id: state
+        name: decide whether to publish
+        env:
+          VERSION: ${{ needs.check.outputs.version }}
+        run: |
+          ua="awspick-release (https://github.com/KKamJi98/aws-profile-pick)"
+          crate="$(curl -s -o /dev/null -w '%{http_code}' -A "${ua}" https://crates.io/api/v1/crates/awspick)"
+          if [[ "${crate}" == "404" ]]; then
+            echo "::notice::awspick is not on crates.io yet; the first publish is manual"
+            echo "publish=false" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+          release="$(curl -s -o /dev/null -w '%{http_code}' -A "${ua}" "https://crates.io/api/v1/crates/awspick/${VERSION}")"
+          if [[ "${release}" == "200" ]]; then
+            echo "::notice::awspick ${VERSION} is already on crates.io"
+            echo "publish=false" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+          if [[ "${crate}" != "200" || "${release}" != "404" ]]; then
+            echo "unexpected crates.io answers: crate=${crate} version=${release}" >&2
+            exit 1
+          fi
+          echo "publish=true" >> "${GITHUB_OUTPUT}"
+
+      - name: install stable toolchain
+        if: steps.state.outputs.publish == 'true'
+        run: rustup toolchain install stable --profile minimal && rustup default stable
+
+      - id: auth
+        if: steps.state.outputs.publish == 'true'
+        uses: rust-lang/crates-io-auth-action@3268eb413133e2960fa4ae0e963ca76380c54cd9 # v1.0.6
+
+      - if: steps.state.outputs.publish == 'true'
+        run: cargo publish --locked
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
+
+  homebrew:
+    needs: [check, release]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Tag-only environment, as for crates-io. Moving HOMEBREW_TAP_DEPLOY_KEY
+    # from a repository secret to a `release` environment secret would limit
+    # it to these jobs.
+    environment: release
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: dist-*
+          path: dist/
+          merge-multiple: true
+
+      - name: render formula
+        env:
+          VERSION: ${{ needs.check.outputs.version }}
+        run: bash scripts/release/render-formula.sh "${VERSION}" dist > "${RUNNER_TEMP}/awspick.rb"
+
+      # The deploy key belongs to this repository alone and can write to
+      # KKamJi98/homebrew-tap and nothing else. github.com's host key is
+      # pinned from https://api.github.com/meta.
+      - name: push Formula/awspick.rb
+        env:
+          TAP_KEY: ${{ secrets.HOMEBREW_TAP_DEPLOY_KEY }}
+          VERSION: ${{ needs.check.outputs.version }}
+        run: |
+          if [[ -z "${TAP_KEY}" ]]; then
+            echo "HOMEBREW_TAP_DEPLOY_KEY missing: add the tap deploy key as a repository secret, then re-run this job" >&2
+            exit 1
+          fi
+          ssh_dir="${RUNNER_TEMP}/tap-ssh"
+          (umask 077 && mkdir -p "${ssh_dir}" && printf '%s\n' "${TAP_KEY}" > "${ssh_dir}/key")
+          echo "github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl" > "${ssh_dir}/known_hosts"
+          export GIT_SSH_COMMAND="ssh -i ${ssh_dir}/key -o IdentitiesOnly=yes -o UserKnownHostsFile=${ssh_dir}/known_hosts -o StrictHostKeyChecking=yes"
+          trap 'rm -rf "${ssh_dir}"' EXIT
+
+          git clone --depth 20 git@github.com:KKamJi98/homebrew-tap.git "${RUNNER_TEMP}/tap"
+          cd "${RUNNER_TEMP}/tap"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          mkdir -p Formula
+          cp "${RUNNER_TEMP}/awspick.rb" Formula/awspick.rb
+          if [[ -z "$(git status --porcelain)" ]]; then
+            echo "Formula/awspick.rb already up to date"
+            exit 0
+          fi
+          changed="$(git status --porcelain | awk '{print $2}')"
+          if [[ "${changed}" != "Formula/awspick.rb" ]]; then
+            echo "refusing to commit unexpected changes: ${changed}" >&2
+            exit 1
+          fi
+          git add Formula/awspick.rb
+          git commit -q -m "awspick ${VERSION}"
+
+          # Other repositories release into the same tap; rebase and retry
+          # when their push lands first.
+          for attempt in 1 2 3 4 5; do
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "push attempt ${attempt} rejected; rebasing on the tap's main"
+            sleep $((attempt * 3))
+            git pull --rebase origin main
+          done
+          echo "could not push Formula/awspick.rb after 5 attempts" >&2
+          exit 1

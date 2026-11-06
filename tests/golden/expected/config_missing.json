@@ -1,0 +1,17 @@
+{
+ "runs": [
+  {
+   "stdout": "",
+   "stderr": "ERROR: AWS config file not found at <HOME>/.aws/config\nERROR: No AWS profiles found. Please check your AWS configuration.\n",
+   "exit": 1
+  }
+ ],
+ "files": [
+  {
+   "path": ".zshrc",
+   "type": "file",
+   "mode": "644",
+   "content": ""
+  }
+ ]
+}

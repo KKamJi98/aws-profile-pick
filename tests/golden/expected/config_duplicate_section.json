@@ -1,0 +1,28 @@
+{
+ "runs": [
+  {
+   "stdout": "",
+   "stderr": "ERROR: Error parsing AWS config file: While reading from PosixPath('<HOME>/.aws/config') [line  3]: section 'profile a' already exists\nERROR: No AWS profiles found. Please check your AWS configuration.\n",
+   "exit": 1
+  }
+ ],
+ "files": [
+  {
+   "path": ".aws",
+   "type": "dir",
+   "mode": "755"
+  },
+  {
+   "path": ".aws/config",
+   "type": "file",
+   "mode": "644",
+   "content": "[profile a]\n[profile b]\n[profile a]\n"
+  },
+  {
+   "path": ".zshrc",
+   "type": "file",
+   "mode": "644",
+   "content": ""
+  }
+ ]
+}

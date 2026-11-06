@@ -1,0 +1,50 @@
+{
+  "files": [
+    {
+      "mode": "755",
+      "path": ".aws",
+      "type": "dir"
+    },
+    {
+      "content": "[profile  two-spaces]\n",
+      "mode": "644",
+      "path": ".aws/config",
+      "type": "file"
+    },
+    {
+      "mode": "755",
+      "path": ".config",
+      "type": "dir"
+    },
+    {
+      "mode": "755",
+      "path": ".config/awspick",
+      "type": "dir"
+    },
+    {
+      "content": "two-spaces\n",
+      "mode": "644",
+      "path": ".config/awspick/profile",
+      "type": "file"
+    },
+    {
+      "content": "\n\n# Added by AWS Pick\nexport AWS_PROFILE=\"two-spaces\"\n",
+      "mode": "644",
+      "path": ".zshrc",
+      "type": "file"
+    },
+    {
+      "content": "",
+      "mode": "644",
+      "path": ".zshrc.bak-<TS1>",
+      "type": "file"
+    }
+  ],
+  "runs": [
+    {
+      "exit": 0,
+      "stderr": "INFO: Found 1 AWS profiles\nINFO: Detected shell from SHELL env var: zsh\nINFO: Using zsh configuration at <HOME>/.zshrc\n             AWS Profiles              \n┏━━━━━┳━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━┓\n┃ No. ┃ Profile    ┃ Group  ┃ Current ┃\n┡━━━━━╇━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━┩\n│   1 │ two-spaces │ others │         │\n└─────┴────────────┴────────┴─────────┘\nEnter profile number or name: Selected profile: two-spaces\nINFO: Detected shell from SHELL env var: zsh\nINFO: Using zsh configuration at <HOME>/.zshrc\nINFO: Using zsh configuration at <HOME>/.zshrc\nINFO: Backup created at <HOME>/.zshrc.bak-<TS1>\nINFO: Adding new AWS_PROFILE=two-spaces entry\nINFO: Successfully updated <HOME>/.zshrc with AWS_PROFILE=two-spaces\nBackup created at <HOME>/.zshrc.bak-<TS1>\nUpdated <HOME>/.zshrc with AWS_PROFILE=two-spaces\nINFO: Wrote shared profile to <HOME>/.config/awspick/profile\nUpdated shared profile at <HOME>/.config/awspick/profile\nINFO: Using zsh configuration at <HOME>/.zshrc\nRun 'eval \"$(awspick)\"' to apply in the current shell\n",
+      "stdout": "export AWS_PROFILE=\"two-spaces\"\n"
+    }
+  ]
+}

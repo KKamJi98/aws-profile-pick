@@ -51,3 +51,6 @@ poetry.lock
 
 GEMINI.md
 LAST_CODEX_RUN.md
+
+# Rust
+/target/

@@ -1,0 +1,28 @@
+{
+ "runs": [
+  {
+   "stdout": "",
+   "stderr": "INFO: Found 8 AWS profiles\nINFO: Detected shell from SHELL env var: zsh\nINFO: Using zsh configuration at <HOME>/.zshrc\n                AWS Profiles                \n┏━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━┓\n┃ No. ┃ Profile         ┃ Group  ┃ Current ┃\n┡━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━┩\n│   1 │ acme-prod       │ prod   │         │\n│   2 │ acme-prod-admin │ prod   │         │\n├─────┼─────────────────┼────────┼─────────┤\n│   3 │ acme-dev        │ dev    │         │\n│   4 │ acme-dev-admin  │ dev    │         │\n├─────┼─────────────────┼────────┼─────────┤\n│   5 │ sandbox         │ others │         │\n└─────┴─────────────────┴────────┴─────────┘\nEnter profile number or name: INFO: User cancelled profile selection\nINFO: No profile selected, exiting\n",
+   "exit": 1
+  }
+ ],
+ "files": [
+  {
+   "path": ".aws",
+   "type": "dir",
+   "mode": "755"
+  },
+  {
+   "path": ".aws/config",
+   "type": "file",
+   "mode": "644",
+   "content": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n"
+  },
+  {
+   "path": ".zshrc",
+   "type": "file",
+   "mode": "644",
+   "content": ""
+  }
+ ]
+}

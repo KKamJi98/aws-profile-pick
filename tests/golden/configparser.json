@@ -1,0 +1,162 @@
+[
+ {
+  "text": "",
+  "sections": []
+ },
+ {
+  "text": "[default]\n",
+  "sections": [
+   "default"
+  ]
+ },
+ {
+  "text": "[default]\n[profile a]\nregion = x\n",
+  "sections": [
+   "default",
+   "profile a"
+  ]
+ },
+ {
+  "text": "[profile a[b]]\n[]]\n[]\n",
+  "error": "Parsing",
+  "linenos": [
+   3
+  ]
+ },
+ {
+  "text": "[ profile spaced ]\n[profile  two]\n[profile trail] ; c\n",
+  "sections": [
+   " profile spaced ",
+   "profile  two",
+   "profile trail"
+  ]
+ },
+ {
+  "text": "[DEFAULT]\nregion=x\n[DEFAULT]\n[profile a]\n",
+  "sections": [
+   "profile a"
+  ]
+ },
+ {
+  "text": "[profile a]\n[profile a]\n",
+  "error": "DuplicateSection",
+  "section": "profile a",
+  "lineno": 2
+ },
+ {
+  "text": "[profile a]\nregion=x\nREGION=y\n",
+  "error": "DuplicateOption",
+  "section": "profile a",
+  "option": "region",
+  "lineno": 3
+ },
+ {
+  "text": "[profile a]\nregion=x\n[profile b]\nregion=y\n",
+  "sections": [
+   "profile a",
+   "profile b"
+  ]
+ },
+ {
+  "text": "region=x\n[profile a]\n",
+  "error": "MissingSectionHeader",
+  "lineno": 1
+ },
+ {
+  "text": "# c\n; c\n\n[profile a]\n",
+  "sections": [
+   "profile a"
+  ]
+ },
+ {
+  "text": "[profile a]\nno delimiter here\nalso bad\n",
+  "error": "Parsing",
+  "linenos": [
+   2,
+   3
+  ]
+ },
+ {
+  "text": "[profile a]\n=value\n",
+  "error": "Parsing",
+  "linenos": [
+   2
+  ]
+ },
+ {
+  "text": "[profile a]\n=1\n=2\n",
+  "error": "DuplicateOption",
+  "section": "profile a",
+  "option": "",
+  "lineno": 3
+ },
+ {
+  "text": "[profile a]\nkey = v\n  [profile hidden]\n  more\n[profile b]\n",
+  "sections": [
+   "profile a",
+   "profile b"
+  ]
+ },
+ {
+  "text": "[profile a]\n  indented = 1\n  [profile c]\n",
+  "sections": [
+   "profile a",
+   "profile c"
+  ]
+ },
+ {
+  "text": "[profile a]\nk: v\nk2 :v\n",
+  "sections": [
+   "profile a"
+  ]
+ },
+ {
+  "text": "[profile a]\nbad\n[profile a]\n",
+  "error": "DuplicateSection",
+  "section": "profile a",
+  "lineno": 3
+ },
+ {
+  "text": "﻿[profile a]\n",
+  "error": "MissingSectionHeader",
+  "lineno": 1
+ },
+ {
+  "text": "  [profile indented-header]\n",
+  "sections": [
+   "profile indented-header"
+  ]
+ },
+ {
+  "text": "[profile a]\nk=v\n\n  continued\n[profile b]\n",
+  "sections": [
+   "profile a",
+   "profile b"
+  ]
+ },
+ {
+  "text": "[profile a]\n# comment\n  # indented comment\nk=1\n",
+  "sections": [
+   "profile a"
+  ]
+ },
+ {
+  "text": "[profile é]\n[profile İ]\nKİ=1\nkİ=2\n",
+  "error": "DuplicateOption",
+  "section": "profile İ",
+  "option": "ki̇",
+  "lineno": 4
+ },
+ {
+  "text": "[profile a]\n k=1\n",
+  "sections": [
+   "profile a"
+  ]
+ },
+ {
+  "text": "[profile a]\nk=1\n\u001c\n",
+  "sections": [
+   "profile a"
+  ]
+ }
+]

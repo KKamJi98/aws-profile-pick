@@ -1,0 +1,28 @@
+{
+  "files": [
+    {
+      "mode": "755",
+      "path": ".aws",
+      "type": "dir"
+    },
+    {
+      "content": "[profile a\\1]\n[profile c]\n",
+      "mode": "644",
+      "path": ".aws/config",
+      "type": "file"
+    },
+    {
+      "content": "export AWS_PROFILE=\"c\"\n",
+      "mode": "644",
+      "path": ".zshrc",
+      "type": "file"
+    }
+  ],
+  "runs": [
+    {
+      "exit": 1,
+      "stderr": "INFO: Found 2 AWS profiles\nINFO: Detected shell from SHELL env var: zsh\nINFO: Using zsh configuration at <HOME>/.zshrc\n            AWS Profiles            \n┏━━━━━┳━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━┓\n┃ No. ┃ Profile ┃ Group  ┃ Current ┃\n┡━━━━━╇━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━┩\n│   1 │ a1      │ others │         │\n│   2 │ c       │ others │    *    │\n└─────┴─────────┴────────┴─────────┘\nEnter profile number or name: ERROR: Profile 'a\\1' not found in available profiles\nInvalid selection. Please enter a valid profile number or name.\nEnter profile number or name: \nNo selection made.\nINFO: Empty selection\nINFO: No profile selected, exiting\n",
+      "stdout": ""
+    }
+  ]
+}

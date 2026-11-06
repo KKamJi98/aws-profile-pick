@@ -1,0 +1,30 @@
+{
+ "runs": [
+  {
+   "stdout": "",
+   "stderr": "ERROR: Unexpected error reading AWS profiles: 'utf-8' codec can't decode byte 0xe9 in position 12: invalid continuation byte\nERROR: No AWS profiles found. Please check your AWS configuration.\n",
+   "exit": 1
+  }
+ ],
+ "files": [
+  {
+   "path": ".aws",
+   "type": "dir",
+   "mode": "755"
+  },
+  {
+   "path": ".aws/config",
+   "type": "file",
+   "mode": "644",
+   "content": {
+    "b64": "W3Byb2ZpbGUgY2Fm6V0K"
+   }
+  },
+  {
+   "path": ".zshrc",
+   "type": "file",
+   "mode": "644",
+   "content": ""
+  }
+ ]
+}

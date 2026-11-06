@@ -1,32 +1,26 @@
-# AWS Pick – Codex Prompt
+# AWS Pick - Agent Prompt
 
-> 🛠️ 목적:
-> CLI 도구 `awspick` 개발 및 유지보수를 위한 규칙과 요구사항 명세. 사용자는 AWS 프로파일을 빠르게 전환할 수 있어야 한다.
+> Purpose: rules for developing and maintaining the `awspick` CLI. Users must
+> be able to switch AWS profiles quickly.
 
 ---
 
 ## Rules
 
-1. README.md를 기능 변경 시 항상 갱신
-  
-3. 모든 커밋은 ruff, pytest 테스트를 통과해야 함
-4. Conventional Commits 형식을 사용  
-   - ex: `docs: update README.md`
-5. uv + direnv 사용. `.envrc`에 uv 가상환경의 venv를 activate 시키도록 추가
-6. boto3, AWS, Python 등의 패키징 공식 Best Practice를 준수한다.
-7. 타입 힌트, 순수 함수, 모듈화로 가독성과 확장성을 유지한다.
-
-## Requirement
+1. Update README.md whenever behaviour changes.
+2. Every commit passes `cargo fmt --all --check`, `cargo clippy --all-targets --locked -- -D warnings` and `cargo test --locked`.
+3. Use Conventional Commits (e.g. `docs: update README.md`). release-please derives the version and CHANGELOG from them.
+4. Keep the dependency set small; justify each new crate. `cargo deny check` must pass (deny.toml).
+5. awspick writes to users' rc files. Changes there need a test that runs the binary against a throwaway HOME (tests/cli.rs, tests/golden.rs), never against the real one.
+6. Behaviour that matches awspick 2.0.2 (Python) is pinned by tests/golden. A change that alters a golden case must say why in docs/rust-migration.md.
 
 ## Environment
 
-- Python 3.9+
-- uv for dependency management
-- direnv with `layout uv`
-- Formatters: ruff
-- Testing: pytest
+- Rust stable (edition 2024, rust-version in Cargo.toml)
+- Tests: `cargo test`. Golden fixtures are regenerated with `uv run scripts/gen_golden.py` (needs uv; runs PyPI aws-profile-pick 2.0.2).
 
 ## Release Management
 
-This project uses `googleapis/release-please-action@v4` for automated release management.
-All commit messages must adhere to the Conventional Commits specification to ensure proper versioning and CHANGELOG generation.
+- release-please (`release-type: rust`, `include-component-in-tag: false`) in `.github/workflows/release-please.yml` owns the version in Cargo.toml and Cargo.lock and creates the `v<version>` tag and GitHub release.
+- The tag push runs `.github/workflows/release.yml`: binaries for four targets, attestations, crates.io (Trusted Publishing, environment `release`) and the Homebrew formula in KKamJi98/homebrew-tap.
+- Do not tag by hand and do not edit the version by hand.

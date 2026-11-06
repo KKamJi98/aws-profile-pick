@@ -1,0 +1,81 @@
+# The version bump and the release itself, on every push to main.
+#
+# release-please opens (or updates) the release PR. When that PR is merged it
+# tags the merge commit (v<version>) and creates the GitHub release. Nothing
+# is built or published here: the tag push starts release.yml, which is where
+# binaries, crates.io and the Homebrew tap are handled. Publishing has to run
+# in a tag-triggered run because the `release` environment admits v* tags
+# only.
+#
+# release-please runs on a short-lived GitHub App installation token, not the
+# default GITHUB_TOKEN. GitHub holds pull_request runs on a PR that
+# GITHUB_TOKEN opened or updated (action_required, zero jobs), so the release
+# PR would never get CI; and a tag created with GITHUB_TOKEN would not start
+# release.yml. No long-lived PAT is used.
+name: release-please
+
+on:
+  push:
+    branches:
+      - main
+
+permissions: {}
+
+concurrency:
+  group: release-please
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  # main skips CI, so the gate lives here. A release must not be cut from code
+  # that was never run.
+  test:
+    name: test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: install stable toolchain
+        run: rustup toolchain install stable --profile minimal --component rustfmt,clippy && rustup default stable
+
+      - run: cargo fmt --all --check
+      - run: cargo clippy --all-targets --locked -- -D warnings
+      - run: cargo test --locked
+
+  # Every write here goes through the App token, so GITHUB_TOKEN gets nothing.
+  # The token is scoped to this repository (no owner/repositories input) and to
+  # the two permissions release-please needs: contents for the release commit,
+  # tag and GitHub release, pull-requests for the release PR and its labels.
+  release-please:
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        id: app-token
+        with:
+          client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+
+      # include-component-in-tag: the rust strategy names the component after
+      # the crate, which would make the tag awspick-v3.0.0. The release
+      # environment and release.yml expect v3.0.0, the form 2.x used.
+      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          release-type: rust
+          include-component-in-tag: false

@@ -1,0 +1,22 @@
+{
+  "files": [
+    {
+      "mode": "755",
+      "path": ".aws",
+      "type": "dir"
+    },
+    {
+      "content": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+      "mode": "644",
+      "path": ".aws/config",
+      "type": "file"
+    }
+  ],
+  "runs": [
+    {
+      "exit": 0,
+      "stderr": "",
+      "stdout": "awspick 2.0.2\n"
+    }
+  ]
+}

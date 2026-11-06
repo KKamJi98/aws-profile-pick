@@ -1,0 +1,22 @@
+{
+ "runs": [
+  {
+   "stdout": "",
+   "stderr": "INFO: Found 8 AWS profiles\nusage: awspick [-h] [-f FILTER] [-x EXCLUDE] [-g GROUPS]\n               [--group-rules GROUP_RULES] [--regex] [--case-sensitive]\nawspick: error: unrecognized arguments: extra\n",
+   "exit": 2
+  }
+ ],
+ "files": [
+  {
+   "path": ".aws",
+   "type": "dir",
+   "mode": "755"
+  },
+  {
+   "path": ".aws/config",
+   "type": "file",
+   "mode": "644",
+   "content": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n"
+  }
+ ]
+}
