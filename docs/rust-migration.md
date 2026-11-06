@@ -219,3 +219,22 @@ Known, not changed (inherited from 2.x, low impact):
 - `~/.config/awspick/profile` is written through a fixed `profile.tmp`
   without fsync; two concurrent runs can race.
 - A non-UTF-8 HOME makes the backup, and so the update, fail (safely).
+
+## Release and install notes (differences from the plan)
+
+- v3.0.0's release PR failed the golden suite: the pinned `--version` result
+  held `awspick 2.0.2`. Fixed in #21 (the runner writes `awspick <VERSION>`);
+  the release PR was updated from main and went green before merging.
+- crates.io: v3.0.0 was published by hand from the tag commit (the
+  `crates-io` job skipped as designed), then the GitHub Trusted Publisher
+  (KKamJi98/aws-profile-pick, `release.yml`, environment `release`) was
+  registered. Later versions publish from `release.yml`.
+- The Homebrew formula did not install completions. 3.0.1 adds
+  `generate_completions_from_executable(bin/"awspick", "--completions", ...)`
+  for bash, zsh and fish, as prjump's formula does.
+- WSL was expected to have no earlier awspick. It had
+  `~/.local/bin/awspick`, a Python shim into
+  `~/.local/opt/migration-personal-cli` (created 2026-10-12, not a uv tool),
+  which came before linuxbrew in `PATH`. It was moved to
+  `~/.local/state/rust-migration/backup/awspick.migration-personal-cli-shim`
+  on the WSL host; moving it back restores the old command.
