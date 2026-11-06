@@ -183,3 +183,15 @@ Also fixed, outside the numbered list:
   owner (fchown fails), an unwritable directory or a failed rename fall back
   to the in-place rewrite. Extended attributes and ACLs on the rc are not
   copied to the new file.
+
+## Phase 4. P1 features
+
+| Feature | Notes | Golden cases |
+|---|---|---|
+| `-V`, `--version` | `awspick <CARGO_PKG_VERSION>`, exit 0 | `usage_version_unknown` |
+| `-v`, `--verbose` | INFO lines are off by default. `tests/golden.rs` runs every case with `-v` so stderr still compares with 2.0.2; clap echoes that `-v` in usage errors and help | `bad_option_without_config`, `help_without_config` |
+| `awspick <profile>` | no table, no prompt; exact name, else the single case-insensitive match; several case-insensitive matches or none: `ERROR: ...`, exit 1. Matched against all profiles, not the filtered list, so `AWSPICK_FILTER` does not get in the way | `usage_positional` |
+| credentials profiles | section names of `AWS_SHARED_CREDENTIALS_FILE` (expanded like `AWS_CONFIG_FILE`) or `~/.aws/credentials`, literally and without `DEFAULT`, as botocore does (checked against AWS CLI 2.39.5 `configure list-profiles`). Values are parsed for syntax only and never kept. A broken credentials file is skipped with a `WARNING` (the AWS CLI fails instead), so a file 2.x ignored cannot stop awspick | none (the corpus has no credentials file) |
+| `--completions <bash\|zsh\|fish>` | `clap_complete` 4.6.11 (the version prjump uses); an option, not a subcommand, so it cannot clash with a profile name. bash's script lists the hidden `--export-command` too | `help_without_config` |
+
+P2 and P3 are recorded in docs/ROADMAP.md.

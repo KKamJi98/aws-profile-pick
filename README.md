@@ -3,7 +3,6 @@
 A simple CLI tool to easily switch between AWS profiles in your shell environment.
 
 ```
-INFO: Found 8 AWS profiles
            AWS Profiles
 ┏━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━┓
 ┃ No. ┃ Profile         ┃ Group  ┃ Current ┃
@@ -25,38 +24,40 @@ Enter profile number or name:
 
 ## Overview
 
-AWS Pick (`awspick`) is a command-line utility that helps you quickly switch between different AWS profiles defined in your `~/.aws/config` file. It automatically updates your shell environment by modifying the `AWS_PROFILE` environment variable in your shell configuration file.
+AWS Pick (`awspick`) is a command-line utility that helps you quickly switch between different AWS profiles defined in your `~/.aws/config` and `~/.aws/credentials` files. It automatically updates your shell environment by modifying the `AWS_PROFILE` environment variable in your shell configuration file.
 
 
 
 ## Features
 
 - Automatically groups and color-codes profiles by environment (dev, stg, prod, preprod) with visual dividers between groups.
-- Lists all available AWS profiles from your `~/.aws/config` file with numbered options
-- Allows selection by either number or profile name
+- Lists all available AWS profiles with numbered options: the same names as `aws configure list-profiles`, from `~/.aws/config` (`AWS_CONFIG_FILE`) and `~/.aws/credentials` (`AWS_SHARED_CREDENTIALS_FILE`; only section names are read)
+- Allows selection by either number or profile name, or directly with `awspick <profile>`
 - Validates input to ensure a valid profile is selected
 - Highlights the current `AWS_PROFILE` in the table
 - Supports multiple shells:
   - Bash (`~/.bashrc`)
-  - Zsh (`~/.zshrc`)
+  - Zsh (`~/.zshrc`, or `$ZDOTDIR/.zshrc` when `ZDOTDIR` is set)
   - Fish (`~/.config/fish/config.fish`)
 - Updates your shell configuration file to set the selected profile as the default
 - Writes the selected profile to a shared file for cross-shell sync
-- Creates backup files before modifying your configuration (keeps the 2 most recent backups)
+- Creates backup files before modifying your configuration (keeps the 2 most recent backups; only removes backups it created)
+- Rewrites the rc file atomically and keeps its other bytes and line endings (LF or CRLF) as they were
 - Ensures idempotency (no duplicate modifications if selecting the same profile)
 - Prints a shell command for immediate application
-- Provides clear logging of operations
+- Logs each step with `-v/--verbose`
+- Shell completions for bash, zsh and fish
 - Handles errors gracefully with informative messages
 - Supports case-insensitive profile name matching
 - Filtering and grouping via CLI flags or env vars
 
 ## How It Works
 
-- Read profiles: Parses `~/.aws/config` and collects `default` and sections named `profile <name>`.
+- Read profiles: Parses `~/.aws/config` and collects `default` and sections named `profile <name>` (names are split like the AWS CLI does, so `[profile "a b"]` is `a b`), then adds the section names of `~/.aws/credentials`.
 - Filter list: Applies include/exclude patterns from CLI flags or env vars. Patterns can be substrings or regular expressions (`--regex`), with optional case sensitivity (`--case-sensitive`).
 - Group profiles: Groups names using ordered rules. Default order: `prod`, `stg`, `dev`, `preprod`. Unmatched profiles go to `others` (appended at end unless explicitly positioned). Supports `others` positional marker and `*` wildcard catch-all for custom ordering. Groups are separated by visual dividers.
 - Display and select: Renders a numbered table and highlights the current `AWS_PROFILE` in the "Current" column. Input accepts either the number (1-based, current display order) or the profile name (case-insensitive match supported).
-- Apply to shell: Detects your shell (`bash`, `zsh`, `fish`) and writes or replaces a single `AWS_PROFILE="<name>"` line in the corresponding rc file. Creates a timestamped backup and avoids duplicate changes if the same profile is already set.
+- Apply to shell: Detects your shell (`bash`, `zsh`, `fish`) and writes or replaces the `AWS_PROFILE="<name>"` line in the corresponding rc file. Only lines at the start of a line that set a literal value (`export AWS_PROFILE="x"`, `set -gx AWS_PROFILE x`, optionally followed by a `# comment`, which is kept) are managed; a computed value such as `export AWS_PROFILE="$(cat ...)"` is left alone. Names with characters outside `A-Za-z0-9._@+=,:/-` are single-quoted so the shell never expands them. Creates a timestamped backup and avoids duplicate changes if the same profile is already set.
 - Export command: Prints the exact shell command to stdout so you can run `eval "$(awspick)"` to apply immediately in the current session.
 - Cross-shell sync: Writes the selected profile to `~/.config/awspick/profile` so other shells can pick it up on the next prompt.
 
@@ -93,8 +94,22 @@ Windows is not supported: awspick edits bash, zsh and fish rc files.
 ### Moving from the Python version (2.x)
 
 Versions up to 2.0.2 were published to PyPI as `aws-profile-pick`. 3.0.0 is a
-Rust rewrite with the same command, options, output and files, and PyPI gets no
-further releases. Install the new binary first, then remove the old one:
+Rust rewrite with the same command, options and files, and PyPI gets no
+further releases. What changes for 2.x users:
+
+- `INFO:` log lines are printed only with `-v/--verbose`. stdout (the
+  `export` line) and the summary lines are unchanged, so `eval "$(awspick)"`
+  wrappers keep working.
+- New: `awspick <profile>`, `-V/--version`, `--completions <shell>`, profiles
+  from `~/.aws/credentials`, `AWS_CONFIG_FILE`, `ZDOTDIR`.
+- Bug fixes: fish lines are replaced instead of appended, unusual profile names
+  are quoted for the shell, backups in the same second no longer overwrite each
+  other, other `*.bak-*` files are no longer deleted, Ctrl-C/EOF and invalid
+  regexes no longer print tracebacks, `--help` works without a config, config
+  errors no longer echo the offending line, rc files keep CRLF and non-UTF-8
+  bytes, and the rc write is atomic. docs/rust-migration.md has the full list.
+
+Install the new binary first, then remove the old one:
 
 ```bash
 brew install KKamJi98/tap/awspick      # or: cargo install --locked awspick
@@ -112,13 +127,36 @@ Simply run the command:
 awspick
 ```
 
+Or name the profile to skip the table and the prompt (exact name first, then a
+unique case-insensitive match; filters and groups do not apply):
+
+```bash
+awspick acme-dev
+```
+
+Other options:
+
+```bash
+awspick -v                     # also print INFO log lines
+awspick --version              # awspick <version>
+awspick --completions zsh      # print a completion script (bash, zsh, fish)
+```
+
+Completion scripts, for example:
+
+```bash
+awspick --completions bash > ~/.local/share/bash-completion/completions/awspick
+awspick --completions zsh > "${fpath[1]}/_awspick"
+awspick --completions fish > ~/.config/fish/completions/awspick.fish
+```
+
 Apply the selected profile immediately in the current shell:
 
 ```bash
 eval "$(awspick)"
 ```
 
-All prompts and logs are printed to **stderr**, while the final
+All prompts, summary lines and logs are printed to **stderr**, while the final
 `export AWS_PROFILE="..."` command is printed to **stdout**. This
 ensures the menu is visible when using command substitution.
 
@@ -309,7 +347,9 @@ aws-profile-pick/
 │   └── py.rs           # Python behaviour the port has to match
 ├── tests/              # Binary tests and golden fixtures
 ├── scripts/            # Golden generator, Homebrew formula renderer
-├── docs/rust-migration.md
+├── docs/
+│   ├── rust-migration.md   # Port record, golden differences, bug fixes
+│   └── ROADMAP.md          # Planned features
 ├── Cargo.toml
 └── README.md
 ```
