@@ -267,17 +267,14 @@ fn timestamp() -> String {
     chrono::Local::now().format("%Y%m%d%H%M%S").to_string()
 }
 
-/// `shutil.copy2`: follow symlinks, copy the bytes, then the permission bits
-/// and the access and modification times.
+/// `shutil.copy2` into a new file: follow symlinks, copy the bytes, then the
+/// permission bits and the access and modification times. Fails with
+/// `AlreadyExists` instead of overwriting `dst`.
 fn copy2(src: &Path, dst: &Path) -> io::Result<()> {
     let data = fs::read(src)?;
     let meta = fs::metadata(src)?;
     {
-        let mut f = OpenOptions::new()
-            .write(true)
-            .create(true)
-            .truncate(true)
-            .open(dst)?;
+        let mut f = OpenOptions::new().write(true).create_new(true).open(dst)?;
         f.write_all(&data)?;
     }
     fs::set_permissions(dst, meta.permissions())?;
@@ -289,13 +286,29 @@ fn copy2(src: &Path, dst: &Path) -> io::Result<()> {
 }
 
 /// Back up the rc file and keep the newest `BACKUP_RETENTION_COUNT`.
+///
+/// Backups are named `<rc>.bak-<YYYYmmddHHMMSS>`. A second backup within the
+/// same second gets `-1`, `-2`, ... appended instead of replacing the first,
+/// which in 2.x lost the original rc file.
 pub fn backup_rc_file(rc_path: &Path) -> Result<PathBuf, String> {
-    let backup = PathBuf::from(format!("{}.bak-{}", rc_path.display(), timestamp()));
-    if let Err(e) = copy2(rc_path, &backup) {
-        let msg = py::os_error(&e, rc_path);
-        out::error(&format!("Failed to create backup: {msg}"));
-        return Err(msg);
-    }
+    let base = format!("{}.bak-{}", rc_path.display(), timestamp());
+    let mut n = 0u32;
+    let backup = loop {
+        let candidate = if n == 0 {
+            PathBuf::from(&base)
+        } else {
+            PathBuf::from(format!("{base}-{n}"))
+        };
+        match copy2(rc_path, &candidate) {
+            Ok(()) => break candidate,
+            Err(e) if e.kind() == io::ErrorKind::AlreadyExists && n < 1000 => n += 1,
+            Err(e) => {
+                let msg = py::os_error(&e, rc_path);
+                out::error(&format!("Failed to create backup: {msg}"));
+                return Err(msg);
+            }
+        }
+    };
     out::info(&format!("Backup created at {}", backup.display()));
 
     let parent = rc_path.parent().unwrap_or(Path::new("."));

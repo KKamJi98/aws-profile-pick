@@ -39,9 +39,15 @@
       "type": "file"
     },
     {
-      "content": "set -gx PATH x\n\n# Added by AWS Pick\nset -gx AWS_PROFILE \"acme-prod\"\n",
+      "content": "set -gx PATH x\n",
       "mode": "644",
       "path": ".config/fish/config.fish.bak-<TS1>",
+      "type": "file"
+    },
+    {
+      "content": "set -gx PATH x\n\n# Added by AWS Pick\nset -gx AWS_PROFILE \"acme-prod\"\n",
+      "mode": "644",
+      "path": ".config/fish/config.fish.bak-<TS1>-1",
       "type": "file"
     }
   ],
@@ -53,7 +59,7 @@
     },
     {
       "exit": 0,
-      "stderr": "INFO: Found 8 AWS profiles\nINFO: Detected shell from SHELL env var: fish\nINFO: Using fish configuration at <HOME>/.config/fish/config.fish\n                AWS Profiles                \n┏━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━┓\n┃ No. ┃ Profile         ┃ Group  ┃ Current ┃\n┡━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━┩\n│   1 │ acme-prod       │ prod   │    *    │\n│   2 │ acme-prod-admin │ prod   │         │\n├─────┼─────────────────┼────────┼─────────┤\n│   3 │ acme-stg        │ stg    │         │\n│   4 │ acme-stg-admin  │ stg    │         │\n├─────┼─────────────────┼────────┼─────────┤\n│   5 │ acme-dev        │ dev    │         │\n│   6 │ acme-dev-admin  │ dev    │         │\n├─────┼─────────────────┼────────┼─────────┤\n│   7 │ default         │ others │         │\n│   8 │ sandbox         │ others │         │\n└─────┴─────────────────┴────────┴─────────┘\nEnter profile number or name: Selected profile: acme-prod-admin\nINFO: Detected shell from SHELL env var: fish\nINFO: Using fish configuration at <HOME>/.config/fish/config.fish\nINFO: Using fish configuration at <HOME>/.config/fish/config.fish\nINFO: Backup created at <HOME>/.config/fish/config.fish.bak-<TS1>\nINFO: Replacing existing AWS_PROFILE=acme-prod with acme-prod-admin\nINFO: Successfully updated <HOME>/.config/fish/config.fish with AWS_PROFILE=acme-prod-admin\nBackup created at <HOME>/.config/fish/config.fish.bak-<TS1>\nUpdated <HOME>/.config/fish/config.fish with AWS_PROFILE=acme-prod-admin\nINFO: Wrote shared profile to <HOME>/.config/awspick/profile\nUpdated shared profile at <HOME>/.config/awspick/profile\nINFO: Using fish configuration at <HOME>/.config/fish/config.fish\nRun 'eval \"$(awspick)\"' to apply in the current shell\n",
+      "stderr": "INFO: Found 8 AWS profiles\nINFO: Detected shell from SHELL env var: fish\nINFO: Using fish configuration at <HOME>/.config/fish/config.fish\n                AWS Profiles                \n┏━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━┓\n┃ No. ┃ Profile         ┃ Group  ┃ Current ┃\n┡━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━┩\n│   1 │ acme-prod       │ prod   │    *    │\n│   2 │ acme-prod-admin │ prod   │         │\n├─────┼─────────────────┼────────┼─────────┤\n│   3 │ acme-stg        │ stg    │         │\n│   4 │ acme-stg-admin  │ stg    │         │\n├─────┼─────────────────┼────────┼─────────┤\n│   5 │ acme-dev        │ dev    │         │\n│   6 │ acme-dev-admin  │ dev    │         │\n├─────┼─────────────────┼────────┼─────────┤\n│   7 │ default         │ others │         │\n│   8 │ sandbox         │ others │         │\n└─────┴─────────────────┴────────┴─────────┘\nEnter profile number or name: Selected profile: acme-prod-admin\nINFO: Detected shell from SHELL env var: fish\nINFO: Using fish configuration at <HOME>/.config/fish/config.fish\nINFO: Using fish configuration at <HOME>/.config/fish/config.fish\nINFO: Backup created at <HOME>/.config/fish/config.fish.bak-<TS1>-1\nINFO: Replacing existing AWS_PROFILE=acme-prod with acme-prod-admin\nINFO: Successfully updated <HOME>/.config/fish/config.fish with AWS_PROFILE=acme-prod-admin\nBackup created at <HOME>/.config/fish/config.fish.bak-<TS1>-1\nUpdated <HOME>/.config/fish/config.fish with AWS_PROFILE=acme-prod-admin\nINFO: Wrote shared profile to <HOME>/.config/awspick/profile\nUpdated shared profile at <HOME>/.config/awspick/profile\nINFO: Using fish configuration at <HOME>/.config/fish/config.fish\nRun 'eval \"$(awspick)\"' to apply in the current shell\n",
       "stdout": "set -gx AWS_PROFILE \"acme-prod-admin\"\n"
     }
   ]

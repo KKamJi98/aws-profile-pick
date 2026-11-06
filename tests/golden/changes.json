@@ -1,7 +1,8 @@
 {
  "config_select_spaced_name": "bug 3: names outside [A-Za-z0-9._@+=,:/-] are single-quoted with shell escaping instead of pasted into double quotes",
+ "rc_backup_same_second": "bug 4: a backup made in the same second as the previous one gets a -N suffix instead of overwriting it",
  "rc_shell_injection_kept": "bug 3: names outside [A-Za-z0-9._@+=,:/-] are single-quoted with shell escaping instead of pasted into double quotes",
- "shell_fish_repeat_appends": "bug 1: the fish pattern now matches the set -gx line it writes and no longer swallows the newline after it",
+ "shell_fish_repeat_appends": "bug 1: the fish pattern now matches the set -gx line it writes and no longer swallows the newline after it; bug 4: a backup made in the same second as the previous one gets a -N suffix instead of overwriting it",
  "shell_fish_set_x_detected": "bug 1: the fish pattern now matches the set -gx line it writes and no longer swallows the newline after it",
  "table_backslash_name": "bug 2: profile names are written literally; 2.x let re.sub expand backslash escapes in them; bug 3: names outside [A-Za-z0-9._@+=,:/-] are single-quoted with shell escaping instead of pasted into double quotes"
 }

@@ -537,3 +537,31 @@ fn profile_names_are_quoted_for_the_shell() {
 fn shell_quote(s: &str) -> String {
     format!("'{}'", s.replace('\'', "'\\''"))
 }
+
+fn wait_for_fresh_second() {
+    use std::time::{SystemTime, UNIX_EPOCH};
+    while SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .subsec_millis()
+        > 200
+    {
+        std::thread::sleep(Duration::from_millis(10));
+    }
+}
+
+/// Bug 4: backups are named by the second, so a second switch within the
+/// same second overwrote the first backup and lost the original rc file.
+#[test]
+fn backups_in_the_same_second_do_not_overwrite_each_other() {
+    let h = Home::new(Some(CFG));
+    h.write(".zshrc", "ORIGINAL\n");
+    wait_for_fresh_second();
+    h.run("/bin/zsh", &[], "prod\n");
+    h.run("/bin/zsh", &[], "dev\n");
+    let backups = h.backups(".zshrc");
+    assert_eq!(backups.len(), 2, "{backups:?}");
+    let contents: Vec<String> = backups.iter().map(|b| h.read(b)).collect();
+    assert!(contents.contains(&"ORIGINAL\n".to_owned()), "{contents:?}");
+}
+
