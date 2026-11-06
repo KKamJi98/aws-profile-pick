@@ -464,3 +464,22 @@ fn fish_switch_replaces_the_existing_line() {
         assert_eq!(rc, "set -gx AWS_PROFILE \"dev\"\n", "{flags}");
     }
 }
+
+/// Bug 2: re.sub expanded backslash escapes from the profile name, so `a\1`
+/// wrote `export AWS_PROFILE="a"c""` and `b\yz` crashed. The replacement is
+/// literal (regex::NoExpand) since the Phase 1 port.
+#[test]
+fn backslash_in_profile_name_is_written_literally() {
+    let h = Home::new(Some(
+        "[profile a\\1]\n[profile b\\yz]\n[profile c$1]\n[profile d]\n",
+    ));
+    for name in ["a\\1", "b\\yz", "c$1"] {
+        h.write(".zshrc", "export AWS_PROFILE=\"d\"\n");
+        let o = h.run("/bin/zsh", &[], &format!("{name}\n"));
+        assert_eq!(o.status.code(), Some(0), "{name}");
+        let rc = h.read(".zshrc");
+        assert_eq!(count(&rc, "AWS_PROFILE"), 1, "{rc}");
+        assert!(rc.contains(name), "{name}: {rc}");
+        assert!(!rc.contains("\"d\""), "{rc}");
+    }
+}
