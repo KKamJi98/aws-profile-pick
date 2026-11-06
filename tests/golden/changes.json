@@ -6,6 +6,8 @@
  "rc_shell_injection_kept": "bug 3: names outside [A-Za-z0-9._@+=,:/-] are single-quoted with shell escaping instead of pasted into double quotes",
  "select_eof": "bug 6: end of input at the prompt cancels like an empty answer instead of raising EOFError",
  "select_eof_after_invalid": "bug 6: end of input at the prompt cancels like an empty answer instead of raising EOFError",
+ "select_fullwidth_digit": "bug 8: only ASCII digits select by number; Python accepted U+FF12 and crashed on U+00B2",
+ "select_superscript_digit": "bug 8: only ASCII digits select by number; Python accepted U+FF12 and crashed on U+00B2",
  "shell_fish_repeat_appends": "bug 1: the fish pattern now matches the set -gx line it writes and no longer swallows the newline after it; bug 4: a backup made in the same second as the previous one gets a -N suffix instead of overwriting it",
  "shell_fish_set_x_detected": "bug 1: the fish pattern now matches the set -gx line it writes and no longer swallows the newline after it",
  "table_backslash_name": "bug 2: profile names are written literally; 2.x let re.sub expand backslash escapes in them; bug 3: names outside [A-Za-z0-9._@+=,:/-] are single-quoted with shell escaping instead of pasted into double quotes"

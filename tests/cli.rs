@@ -608,3 +608,18 @@ fn invalid_regex_is_reported_plainly() {
     assert!(e.contains("ERROR: invalid regex '(': "), "{e}");
     assert!(!e.contains("unexpected error"), "{e}");
 }
+
+/// Bug 8: str.isdigit() let non-ASCII digits through to int(); `２` picked
+/// profile 2 and `²` crashed. Only ASCII digits select by number.
+#[test]
+fn only_ascii_digits_select_by_number() {
+    let h = Home::new(Some(CFG));
+    h.write(".zshrc", "");
+    for input in ["\u{ff12}\nq\n", "\u{b2}\nq\n"] {
+        let o = h.run("/bin/zsh", &[], input);
+        assert_eq!(o.status.code(), Some(1));
+        let e = stderr(&o);
+        assert!(e.contains("not found in available profiles"), "{e}");
+        assert!(!e.contains("unexpected error"), "{e}");
+    }
+}
