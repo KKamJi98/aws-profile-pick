@@ -623,3 +623,17 @@ fn only_ascii_digits_select_by_number() {
         assert!(!e.contains("unexpected error"), "{e}");
     }
 }
+
+/// Bug 9: rich parsed table cells as markup, so `a[/b]` crashed the program
+/// and `team[red]x` lost text.
+#[test]
+fn profile_names_are_displayed_literally() {
+    let h = Home::new(Some(
+        "[profile team[red]x]\n[profile a[/b]]\n[profile ok]\n",
+    ));
+    h.write(".zshrc", "");
+    let o = h.run("/bin/zsh", &[], "q\n");
+    let e = stderr(&o);
+    assert!(e.contains("│ team[red]x │"), "{e}");
+    assert!(e.contains("│ a[/b]      │"), "{e}");
+}
