@@ -12,7 +12,7 @@ use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use regex::{NoExpand, Regex};
+use regex::Regex;
 
 use crate::out;
 use crate::py;
@@ -49,27 +49,57 @@ impl ShellConfig {
         }
     }
 
-    /// The profile a matched rc value names: the shell word, unquoted, or
-    /// (for values that are not a single word) the 2.x reading, which strips
-    /// surrounding quote characters.
-    pub fn value_of(&self, raw: &str) -> String {
-        let raw = py::strip(raw);
-        shell_word(raw, self.kind).unwrap_or_else(|| raw.trim_matches(['"', '\'']).to_owned())
-    }
-
-    /// The 2.x patterns, with `\s` widened to Python's whitespace set.
-    pub fn profile_pattern(&self) -> Regex {
+    /// Lines that assign AWS_PROFILE at column 0. Indented lines, such as
+    /// the export inside a shell function, are never touched.
+    fn line_pattern(&self) -> Regex {
         let pattern = match self.kind {
             // `set` with any mix of -g/-x/-gx/-xg/--global/--export before the
             // name. 2.x accepted only a single -g or -x, which never matched
             // the `set -gx` line it wrote itself.
             Kind::Fish => {
-                r#"(?m)^set(?:[ \t]+(?:-[gx]{1,2}|--global|--export))+[ \t]+AWS_PROFILE[ \t]+["']?(.+?)["']?[ \t]*$"#
+                r"(?m)^set(?:[ \t]+(?:-[gx]{1,2}|--global|--export))+[ \t]+AWS_PROFILE[ \t]+(?P<rest>[^\n]*)$"
             }
-            _ => r"(?m)^export[\s\x1c-\x1f]+AWS_PROFILE=(.+)$",
+            _ => r"(?m)^export[ \t]+AWS_PROFILE=(?P<rest>[^\n]*)$",
         };
         Regex::new(pattern).expect("static pattern")
     }
+
+    /// The AWS_PROFILE assignments awspick manages in `content`: a single
+    /// literal word (quoted or not), optionally followed by a `#` comment.
+    /// Values that expand anything (`$`, backticks) are left to the user.
+    pub fn assignments(&self, content: &str) -> Vec<Assignment> {
+        self.line_pattern()
+            .captures_iter(content)
+            .filter_map(|c| {
+                let whole = c.get(0).expect("match");
+                let rest = c.name("rest").expect("group");
+                let (value, len) = scan_word(rest.as_str(), self.kind)?;
+                let tail = &rest.as_str()[len..];
+                let comment = py::strip(tail);
+                if !comment.is_empty() && !comment.starts_with('#') {
+                    return None;
+                }
+                let tail = if comment.is_empty() {
+                    ""
+                } else {
+                    tail.trim_end()
+                };
+                Some(Assignment {
+                    span: whole.start()..whole.end(),
+                    value,
+                    tail: tail.to_owned(),
+                })
+            })
+            .collect()
+    }
+}
+
+/// One managed AWS_PROFILE line.
+pub struct Assignment {
+    span: std::ops::Range<usize>,
+    value: String,
+    /// Whitespace and comment after the value, kept on rewrite.
+    tail: String,
 }
 
 /// Characters a profile name may contain and still be written the 2.x way,
@@ -91,17 +121,19 @@ pub fn quote(profile: &str, kind: Kind) -> String {
     }
 }
 
-/// Parse `raw` as exactly one shell word (quotes and escapes resolved).
-/// `None` if it is not a single word or uses expansion.
-fn shell_word(raw: &str, kind: Kind) -> Option<String> {
+/// Read one shell word from the start of `raw`, resolving quotes and
+/// escapes. Returns the word and the number of bytes it took; stops at the
+/// first unquoted whitespace. `None` if the word is not a plain literal
+/// (expansion, globbing, operators) or a quote is left open.
+fn scan_word(raw: &str, kind: Kind) -> Option<(String, usize)> {
     let mut out = String::new();
-    let mut chars = raw.chars().peekable();
-    while let Some(c) = chars.next() {
+    let mut chars = raw.char_indices().peekable();
+    while let Some((i, c)) = chars.next() {
         match c {
             '\'' => loop {
-                match chars.next()? {
+                match chars.next()?.1 {
                     '\'' => break,
-                    '\\' if kind == Kind::Fish => match chars.next()? {
+                    '\\' if kind == Kind::Fish => match chars.next()?.1 {
                         e @ ('\\' | '\'') => out.push(e),
                         e => {
                             out.push('\\');
@@ -112,10 +144,10 @@ fn shell_word(raw: &str, kind: Kind) -> Option<String> {
                 }
             },
             '"' => loop {
-                match chars.next()? {
+                match chars.next()?.1 {
                     '"' => break,
                     '$' | '`' => return None,
-                    '\\' => match chars.next()? {
+                    '\\' => match chars.next()?.1 {
                         e @ ('\\' | '"' | '$' | '`') => out.push(e),
                         e => {
                             out.push('\\');
@@ -125,16 +157,22 @@ fn shell_word(raw: &str, kind: Kind) -> Option<String> {
                     ch => out.push(ch),
                 }
             },
-            '\\' => out.push(chars.next()?),
+            '\\' => out.push(chars.next()?.1),
             '$' | '`' | '(' | ')' | ';' | '&' | '|' | '<' | '>' | '*' | '?' | '[' | '{' | '~'
-            | '#' => {
-                return None;
-            }
-            c if py::is_space(c) => return None,
+            | '#' => return None,
+            c if py::is_space(c) => return Some((out, i)),
             c => out.push(c),
         }
     }
-    Some(out)
+    Some((out, raw.len()))
+}
+
+/// `raw` as exactly one shell word.
+#[cfg(test)]
+fn shell_word(raw: &str, kind: Kind) -> Option<String> {
+    scan_word(raw, kind)
+        .filter(|(_, n)| *n == raw.len())
+        .map(|(w, _)| w)
 }
 
 /// `detect_shell`: `$SHELL`'s basename, else the parent process name.
@@ -401,8 +439,7 @@ pub fn get_current_profile(home: &Path) -> Option<String> {
             return None;
         }
     };
-    let caps = config.profile_pattern().captures(&content)?;
-    let value = config.value_of(&caps[1]);
+    let value = config.assignments(&content).into_iter().next()?.value;
     if value.is_empty() { None } else { Some(value) }
 }
 
@@ -462,8 +499,8 @@ pub fn update_aws_profile(
             return Err(UpdateError::Failed);
         }
     };
-    let pattern = config.profile_pattern();
-    let current = pattern.captures(&content).map(|c| config.value_of(&c[1]));
+    let assignments = config.assignments(&content);
+    let current = assignments.first().map(|a| a.value.clone());
 
     if current.as_deref() == Some(profile) {
         out::info(&format!(
@@ -482,7 +519,16 @@ pub fn update_aws_profile(
 
     let line = config.profile_line(profile);
     let new_content = if let Some(cur) = &current {
-        let replaced = pattern.replace_all(&content, NoExpand(&line)).into_owned();
+        // Rewrite every managed line; the new text is inserted literally.
+        let mut replaced = String::with_capacity(content.len() + line.len());
+        let mut last = 0;
+        for a in &assignments {
+            replaced.push_str(&content[last..a.span.start]);
+            replaced.push_str(&line);
+            replaced.push_str(&a.tail);
+            last = a.span.end;
+        }
+        replaced.push_str(&content[last..]);
         out::info(&format!(
             "Replacing existing AWS_PROFILE={cur} with {profile}"
         ));
@@ -527,34 +573,43 @@ mod tests {
         }
     }
 
-    #[test]
-    fn indented_export_is_not_matched() {
-        let content = "export AWS_PROFILE=\"company\"\nawspick_sync() {\n    export AWS_PROFILE=\"$(cat \"$f\")\"\n}\n";
-        let p = cfg(Kind::Zsh).profile_pattern();
-        let all: Vec<_> = p.captures_iter(content).map(|c| c[1].to_owned()).collect();
-        assert_eq!(all, vec!["\"company\""]);
+    fn values(kind: Kind, content: &str) -> Vec<(String, String)> {
+        cfg(kind)
+            .assignments(content)
+            .into_iter()
+            .map(|a| (a.value, a.tail))
+            .collect()
+    }
+
+    fn v(value: &str, tail: &str) -> (String, String) {
+        (value.to_owned(), tail.to_owned())
     }
 
     #[test]
-    fn replacement_is_literal() {
-        let p = cfg(Kind::Zsh).profile_pattern();
-        let out = p.replace_all(
-            "export AWS_PROFILE=\"c\"\n",
-            NoExpand("export AWS_PROFILE=\"a$1\\1\""),
+    fn indented_export_is_not_managed() {
+        let content = "export AWS_PROFILE=\"company\"\nawspick_sync() {\n    export AWS_PROFILE=\"$(cat \"$f\")\"\n}\n";
+        assert_eq!(values(Kind::Zsh, content), vec![v("company", "")]);
+    }
+
+    #[test]
+    fn only_literal_values_are_managed() {
+        let content = "export AWS_PROFILE=a # note\nexport AWS_PROFILE=\"$(cat f)\"\n\
+                       export AWS_PROFILE=`x`\nexport AWS_PROFILE=a b\nexport  AWS_PROFILE='c d'  \n";
+        assert_eq!(
+            values(Kind::Zsh, content),
+            vec![v("a", " # note"), v("c d", "")]
         );
-        assert_eq!(out, "export AWS_PROFILE=\"a$1\\1\"\n");
     }
 
     #[test]
     fn fish_pattern_matches_the_line_it_writes() {
-        let p = cfg(Kind::Fish).profile_pattern();
-        assert!(p.is_match("set -gx AWS_PROFILE \"a\""));
-        assert!(p.is_match("set --global --export AWS_PROFILE a"));
-        assert!(p.is_match("set -x AWS_PROFILE 'a'"));
-        assert!(!p.is_match("set -gx AWS_PROFILE_X a"));
-        assert!(!p.is_match("  set -gx AWS_PROFILE a"));
-        assert!(p.is_match("set -gx AWS_PROFILE \"prod\"\n"));
-        assert!(p.is_match("x\n\n# Added by AWS Pick\nset -gx AWS_PROFILE \"prod\"\n"));
+        let f = |c: &str| values(Kind::Fish, c);
+        assert_eq!(f("set -gx AWS_PROFILE \"a\""), vec![v("a", "")]);
+        assert_eq!(f("set --global --export AWS_PROFILE a"), vec![v("a", "")]);
+        assert_eq!(f("set -x AWS_PROFILE 'a'\n"), vec![v("a", "")]);
+        assert!(f("set -gx AWS_PROFILE_X a").is_empty());
+        assert!(f("  set -gx AWS_PROFILE a").is_empty());
+        assert!(f("set -gx AWS_PROFILE (cat f)").is_empty());
     }
 
     #[test]

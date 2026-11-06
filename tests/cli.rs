@@ -655,3 +655,38 @@ fn config_errors_do_not_print_file_contents() {
         assert!(!e.contains("EXAMPLEKEY"), "{e}");
     }
 }
+
+/// Bug 11: the 2.x pattern took everything after `AWS_PROFILE=` as the
+/// value. A trailing comment became part of the current profile and was
+/// deleted on the next switch, and a computed value such as
+/// `"$(cat ~/.config/awspick/profile)"` was overwritten with a constant.
+#[test]
+fn only_literal_assignments_are_managed() {
+    let h = Home::new(Some(CFG));
+    h.write(".zshrc", "export AWS_PROFILE=prod # pinned by me\n");
+    let e = stderr(&h.run("/bin/zsh", &[], "q\n"));
+    let line = e.lines().find(|l| l.contains(" prod ")).unwrap();
+    assert!(line.contains('*'), "{line}");
+    h.run("/bin/zsh", &[], "dev\n");
+    assert_eq!(
+        h.read(".zshrc"),
+        "export AWS_PROFILE=\"dev\" # pinned by me\n"
+    );
+
+    let dynamic = "export AWS_PROFILE=\"$(cat ~/.config/awspick/profile)\"\n";
+    h.write(".zshrc", dynamic);
+    h.run("/bin/zsh", &[], "dev\n");
+    let rc = h.read(".zshrc");
+    assert!(rc.starts_with(dynamic), "{rc}");
+    assert!(rc.ends_with("export AWS_PROFILE=\"dev\"\n"), "{rc}");
+
+    h.write(
+        ".zshrc",
+        "export AWS_PROFILE=`cat f`\nexport AWS_PROFILE='prod'\n",
+    );
+    h.run("/bin/zsh", &[], "dev\n");
+    assert_eq!(
+        h.read(".zshrc"),
+        "export AWS_PROFILE=`cat f`\nexport AWS_PROFILE=\"dev\"\n"
+    );
+}
