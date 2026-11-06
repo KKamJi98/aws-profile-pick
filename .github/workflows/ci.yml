@@ -1,8 +1,9 @@
-# Tests and lint for pull requests and side branches.
+# Format, lint, tests, dependency policy and a packaging dry run for pull
+# requests and side branches, on the two operating systems awspick ships for.
 #
-# main is deliberately absent: release.yml runs the same checks there as the gate
-# in front of releasing, so covering main here too would run every test twice per
-# push for no extra signal.
+# main is deliberately absent: release-please.yml runs the same checks there
+# as the gate in front of a release, so covering main here too would run every
+# test twice per push for no extra signal.
 name: CI
 
 on:
@@ -13,28 +14,64 @@ on:
 
 permissions: {}
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+
 jobs:
   test:
+    name: test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        # No Windows: awspick edits bash/zsh/fish rc files and prints POSIX or
+        # fish syntax, and its shell detection relies on $SHELL and ps.
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The runner images ship rustup; no third-party toolchain action needed.
+      - name: install stable toolchain
+        run: rustup toolchain install stable --profile minimal --component rustfmt,clippy && rustup default stable
+
+      - run: cargo fmt --all --check
+      - run: cargo clippy --all-targets --locked -- -D warnings
+      - run: cargo test --locked
+
+  deny:
+    name: cargo-deny
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
-          python-version: '3.11'
+          persist-credentials: false
+      - uses: EmbarkStudios/cargo-deny-action@3c6349835b2b7b196a839186cb8b78e02f7b5f25 # v2.1.1
+        with:
+          command: check advisories bans licenses sources
 
-      # `uv run` resolves against uv.lock, so the ruff CI enforces is the ruff
-      # declared here. The previous steps ran `uv pip install ruff` unpinned
-      # against a project that configured no rules, which made the verdict a
-      # function of the calendar: green in February, 75 errors in August with no
-      # commit in between.
-      - name: Test
-        run: uv run --extra dev pytest -q
-
-      - name: Lint
-        run: |
-          uv run --extra dev ruff check .
-          uv run --extra dev ruff format --check .
+  # Publishing problems show up here instead of on release day.
+  package:
+    name: cargo package
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: install stable toolchain
+        run: rustup toolchain install stable --profile minimal && rustup default stable
+      - run: cargo publish --dry-run --locked
