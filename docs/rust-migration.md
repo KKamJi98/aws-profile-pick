@@ -138,3 +138,48 @@ The 34 pytest tests mocked `open` and `Path.exists`. They are replaced by
 binary-level test. `test_update_aws_profile_fish` only checked that the new
 line was present, which hid bug 1; its port keeps that weak assertion in
 Phase 1 and is tightened in Phase 3.
+
+## Phase 3. Bug fixes
+
+Each bug from the plan is one commit with a test in `tests/cli.rs` that
+failed before the fix. Where a fix changes a golden case, the case is listed
+in `tests/golden/changes.json` with the reason, and its new result is pinned
+in `tests/golden/changed/` (`python3 scripts/golden-change.py "<reason>"
+<case>...`, then `GOLDEN_BLESS=1 cargo test --test golden`). The 2.0.2
+results in `tests/golden/expected/` stay as they were, so every departure
+from 2.0.2 is visible in one file.
+
+| Bug | Change | Golden cases |
+|---|---|---|
+| 1 | fish: `set` with any mix of `-g`, `-x`, `-gx`, `-xg`, `--global`, `--export` is the managed line; switching replaces it instead of appending another block | `shell_fish_repeat_appends`, `shell_fish_set_x_detected` |
+| 2 | names are written literally (already true since Phase 1; now pinned) | `table_backslash_name` |
+| 3 | names outside `[A-Za-z0-9._@+=,:/-]` are single-quoted with the shell's escaping (POSIX `'\''`, fish `\\` `\'`); plain names keep `"name"` | `config_select_spaced_name`, `rc_shell_injection_kept`, `table_backslash_name` |
+| 4 | a backup in the same second as the previous one gets `-1`, `-2`, ... | `rc_backup_same_second`, `shell_fish_repeat_appends` |
+| 5 | rotation removes only `<rc>.bak-<14 digits>[-N]` | `rc_backup_rotation` |
+| 6 | end of input at the prompt cancels ("No selection made.", exit 1) | `select_eof`, `select_eof_after_invalid` |
+| 7 | invalid `--regex`: `ERROR: invalid regex '<pattern>': <reason>`, exit 1 | `filter_regex_invalid` |
+| 8 | only ASCII digits select by number | `select_fullwidth_digit`, `select_superscript_digit` |
+| 9 | table cells are printed literally (pinned) | `table_markup_like_names` |
+| 10 | config errors name file and line, never the line text (pinned) | `config_bom`, `config_option_before_section`, `config_parse_error_secret_line` |
+| 11 | only literal assignments are managed (one quoted or bare word, optional `# comment`, comment kept); `$`/backtick values are left alone | `rc_inline_comment`, `rc_unindented_dynamic_line` |
+| 12 | arguments are parsed before the config is read | `bad_option_without_config`, `help_without_config` |
+| 13 | `AWS_CONFIG_FILE` is honoured; `[profile ...]` names are shlex-split like botocore; `[default]` and `[profile default]` are one profile. `tests/cli.rs` cross-checks with `aws configure list-profiles` when the AWS CLI is installed and otherwise uses the values recorded from AWS CLI 2 | `config_section_edge_cases`, `config_select_spaced_name`, `rc_shell_injection_kept`, `table_backslash_name` |
+| 14 | zsh uses `$ZDOTDIR/.zshrc` when `ZDOTDIR` is set | `shell_zdotdir_ignored` |
+| 15 | the rc file is read and written as bytes: CRLF stays CRLF (an appended block uses the file's line ending), non-UTF-8 bytes are kept, a line that is not UTF-8 is never managed | `rc_crlf`, `rc_non_utf8` |
+
+Also fixed, outside the numbered list:
+
+- Ctrl-C at the prompt prints the same cancel lines as an empty answer and
+  exits 1. Elsewhere it exits 130 (2.x: traceback).
+- Atomic rc write. The plan could not reproduce the risk with Python
+  (`ulimit -f` broke the interpreter start). The Rust binary starts under
+  `ulimit -f`, so `failed_write_leaves_rc_intact` reproduces it: with the
+  2.x-style truncate the rc was cut at the size limit; now the rc is
+  unchanged and the error is `[Errno 27] File too large`. The new contents go
+  to `.<name>.awspick-<pid>-<n>.tmp` beside the real file (after following a
+  symlink), get the file's owner, group and mode, are synced and renamed
+  over it. The rc is first opened for writing so a read-only rc is still
+  refused (`[Errno 13]`) instead of being replaced. Hard links, a different
+  owner (fchown fails), an unwritable directory or a failed rename fall back
+  to the in-place rewrite. Extended attributes and ACLs on the rc are not
+  copied to the new file.
