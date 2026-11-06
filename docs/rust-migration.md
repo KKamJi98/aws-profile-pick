@@ -195,3 +195,27 @@ Also fixed, outside the numbered list:
 | `--completions <bash\|zsh\|fish>` | `clap_complete` 4.6.11 (the version prjump uses); an option, not a subcommand, so it cannot clash with a profile name. bash's script lists the hidden `--export-command` too | `help_without_config` |
 
 P2 and P3 are recorded in docs/ROADMAP.md.
+
+## Final review (before the PR left draft)
+
+Fixed:
+
+- Rotation could delete the backup it had just made when older backups sort
+  after it (names are local time: time zone change, DST fall-back). The new
+  backup is now never a rotation candidate (`rotation_keeps_the_new_backup`).
+  Backups are also created owner-only until the rc's mode is applied.
+- `scripts/release/render-formula.sh` exited 0 with an empty `sha256` when a
+  checksum file was missing; the sums are now computed before the heredoc.
+- The `homebrew` job runs in the tag-only `release` environment, like
+  `crates-io`.
+
+Known, not changed (inherited from 2.x, low impact):
+
+- "already set" compares only the first managed line; an rc with two managed
+  lines `"b"` then `"a"` is left alone by `awspick b`.
+- Ctrl-C in the middle of the rc write can leave the
+  `.<rc>.awspick-<pid>-<n>.tmp` file, or, in the in-place fallback, a
+  truncated rc (the backup exists by then).
+- `~/.config/awspick/profile` is written through a fixed `profile.tmp`
+  without fsync; two concurrent runs can race.
+- A non-UTF-8 HOME makes the backup, and so the update, fail (safely).
