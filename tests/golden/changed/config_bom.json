@@ -1,0 +1,28 @@
+{
+  "files": [
+    {
+      "mode": "755",
+      "path": ".aws",
+      "type": "dir"
+    },
+    {
+      "content": "﻿[profile a]\n",
+      "mode": "644",
+      "path": ".aws/config",
+      "type": "file"
+    },
+    {
+      "content": "",
+      "mode": "644",
+      "path": ".zshrc",
+      "type": "file"
+    }
+  ],
+  "runs": [
+    {
+      "exit": 1,
+      "stderr": "ERROR: Error parsing AWS config file: File contains no section headers.\nfile: PosixPath('<HOME>/.aws/config'), line: 1\nERROR: No AWS profiles found. Please check your AWS configuration.\n",
+      "stdout": ""
+    }
+  ]
+}

@@ -637,3 +637,21 @@ fn profile_names_are_displayed_literally() {
     assert!(e.contains("│ team[red]x │"), "{e}");
     assert!(e.contains("│ a[/b]      │"), "{e}");
 }
+
+/// Bug 10: configparser's error message quoted the offending line, which
+/// can hold a secret key.
+#[test]
+fn config_errors_do_not_print_file_contents() {
+    let secret = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY";
+    for config in [
+        format!("[profile a]\nregion=x\n{secret}\n"),
+        format!("{secret}=1\n[profile a]\n"),
+    ] {
+        let h = Home::new(Some(&config));
+        let o = h.run("/bin/zsh", &[], "q\n");
+        assert_eq!(o.status.code(), Some(1));
+        let e = stderr(&o);
+        assert!(e.contains("ERROR: Error parsing AWS config file:"), "{e}");
+        assert!(!e.contains("EXAMPLEKEY"), "{e}");
+    }
+}
