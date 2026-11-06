@@ -581,3 +581,18 @@ fn rotation_leaves_other_backup_files_alone() {
     assert!(!h.exists(".zshrc.bak-20240101000000"));
     assert!(h.exists(".zshrc.bak-20250101000000"));
 }
+
+/// Bug 6: end of input at the prompt raised EOFError with a traceback.
+#[test]
+fn end_of_input_cancels_like_an_empty_answer() {
+    let h = Home::new(Some(CFG));
+    h.write(".zshrc", "");
+    for input in ["", "nope\n"] {
+        let o = h.run("/bin/zsh", &[], input);
+        assert_eq!(o.status.code(), Some(1));
+        let e = stderr(&o);
+        assert!(e.contains("No selection made."), "{e}");
+        assert!(!e.contains("unexpected error"), "{e}");
+        assert!(stdout(&o).is_empty());
+    }
+}

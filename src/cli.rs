@@ -146,7 +146,13 @@ fn get_profile_selection(profiles: &[String]) -> Selection {
         out::err_raw("Enter profile number or name: ");
         let line = match read_line() {
             Input::Line(l) => l,
-            Input::Eof => return Selection::Unexpected("EOF when reading a line".into()),
+            // End of input is a cancel, like an empty answer. 2.x let
+            // EOFError escape with a traceback.
+            Input::Eof => {
+                out::eprintln("\nNo selection made.");
+                out::info("Empty selection");
+                return Selection::Cancelled;
+            }
             Input::Error(m) => return Selection::Unexpected(m),
         };
         let selection = py::strip(&line);
