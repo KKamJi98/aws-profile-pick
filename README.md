@@ -1,69 +1,28 @@
-# AWS Pick
+# awspick
 
-A simple CLI tool to easily switch between AWS profiles in your shell environment.
+Pick an AWS profile from a grouped, filterable list and apply it to your shell.
 
-```
-           AWS Profiles
-┏━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━┓
-┃ No. ┃ Profile         ┃ Group  ┃ Current ┃
-┡━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━┩
-│   1 │ acme-prod       │ prod   │         │
-│   2 │ acme-prod-admin │ prod   │         │
-├─────┼─────────────────┼────────┼─────────┤
-│   3 │ acme-stg        │ stg    │         │
-│   4 │ acme-stg-admin  │ stg    │         │
-├─────┼─────────────────┼────────┼─────────┤
-│   5 │ acme-dev        │ dev    │    *    │
-│   6 │ acme-dev-admin  │ dev    │         │
-├─────┼─────────────────┼────────┼─────────┤
-│   7 │ default         │ others │         │
-│   8 │ sandbox         │ others │         │
-└─────┴─────────────────┴────────┴─────────┘
-Enter profile number or name:
-```
+[![crates.io](https://img.shields.io/crates/v/awspick.svg)](https://crates.io/crates/awspick)
+[![CI](https://img.shields.io/github/actions/workflow/status/KKamJi98/aws-profile-pick/release-please.yml?branch=main&label=CI)](https://github.com/KKamJi98/aws-profile-pick/actions/workflows/release-please.yml)
+[![License: MIT](https://img.shields.io/github/license/KKamJi98/aws-profile-pick.svg)](https://github.com/KKamJi98/aws-profile-pick/blob/main/LICENSE)
 
-## Overview
+![awspick demo: 12 synthetic profiles, regex filtering, and the selected AWS_PROFILE in the current shell](https://raw.githubusercontent.com/KKamJi98/aws-profile-pick/main/docs/demo/awspick.gif)
 
-AWS Pick (`awspick`) is a command-line utility that helps you quickly switch between different AWS profiles defined in your `~/.aws/config` and `~/.aws/credentials` files. It automatically updates your shell environment by modifying the `AWS_PROFILE` environment variable in your shell configuration file.
+[Watch the MP4](https://github.com/KKamJi98/aws-profile-pick/blob/main/docs/demo/awspick.mp4) | [Reproduce the demo](https://github.com/KKamJi98/aws-profile-pick/blob/main/docs/demo/README.md)
 
+**Before you run it:** selecting a profile edits your shell rc file and saves a backup. The `ap` wrapper below also applies it to the current shell. No AWS API calls, SSO login, or credential validation.
 
+## Why awspick?
 
-## Features
+| Without a picker | With awspick |
+| --- | --- |
+| Find a name in a long list, then type `export AWS_PROFILE=...`. | See environment groups, the current profile, and numbered choices together. |
+| Remember the exact account/role profile name. | Narrow the list with substrings or regex, then choose a number or name. |
+| Change the current tab but forget the next shell. | Persist the default in your rc file; optionally sync other tabs at their next prompt. |
 
-- Automatically groups and color-codes profiles by environment (dev, stg, prod, preprod) with visual dividers between groups.
-- Lists all available AWS profiles with numbered options: the same names as `aws configure list-profiles`, from `~/.aws/config` (`AWS_CONFIG_FILE`) and `~/.aws/credentials` (`AWS_SHARED_CREDENTIALS_FILE`; only section names are read)
-- Allows selection by either number or profile name, or directly with `awspick <profile>`
-- Validates input to ensure a valid profile is selected
-- Highlights the current `AWS_PROFILE` in the table
-- Supports multiple shells:
-  - Bash (`~/.bashrc`)
-  - Zsh (`~/.zshrc`, or `$ZDOTDIR/.zshrc` when `ZDOTDIR` is set)
-  - Fish (`~/.config/fish/config.fish`)
-- Updates your shell configuration file to set the selected profile as the default
-- Writes the selected profile to a shared file for cross-shell sync
-- Creates backup files before modifying your configuration (keeps the 2 most recent backups; only removes backups it created)
-- Rewrites the rc file atomically and keeps its other bytes and line endings (LF or CRLF) as they were
-- Ensures idempotency (no duplicate modifications if selecting the same profile)
-- Prints a shell command for immediate application
-- Logs each step with `-v/--verbose`
-- Shell completions for bash, zsh and fish
-- Handles errors gracefully with informative messages
-- Supports case-insensitive profile name matching
-- Filtering and grouping via CLI flags or env vars
-
-## How It Works
-
-- Read profiles: Parses `~/.aws/config` and collects `default` and sections named `profile <name>` (names are split like the AWS CLI does, so `[profile "a b"]` is `a b`), then adds the section names of `~/.aws/credentials`.
-- Filter list: Applies include/exclude patterns from CLI flags or env vars. Patterns can be substrings or regular expressions (`--regex`), with optional case sensitivity (`--case-sensitive`).
-- Group profiles: Groups names using ordered rules. Default order: `prod`, `stg`, `dev`, `preprod`. Unmatched profiles go to `others` (appended at end unless explicitly positioned). Supports `others` positional marker and `*` wildcard catch-all for custom ordering. Groups are separated by visual dividers.
-- Display and select: Renders a numbered table and highlights the current `AWS_PROFILE` in the "Current" column. Input accepts either the number (1-based, current display order) or the profile name (case-insensitive match supported).
-- Apply to shell: Detects your shell (`bash`, `zsh`, `fish`) and writes or replaces the `AWS_PROFILE="<name>"` line in the corresponding rc file. Only lines at the start of a line that set a literal value (`export AWS_PROFILE="x"`, `set -gx AWS_PROFILE x`, optionally followed by a `# comment`, which is kept) are managed; a computed value such as `export AWS_PROFILE="$(cat ...)"` is left alone. Names with characters outside `A-Za-z0-9._@+=,:/-` are single-quoted so the shell never expands them. Creates a timestamped backup and avoids duplicate changes if the same profile is already set.
-- Export command: Prints the exact shell command to stdout so you can run `eval "$(awspick)"` to apply immediately in the current session.
-- Cross-shell sync: Writes the selected profile to `~/.config/awspick/profile` so other shells can pick it up on the next prompt.
+Already know the name? `ap acme-dev-admin` skips the menu. This is a small profile picker, not an AWS login or credential manager.
 
 ## Installation
-
-awspick is a single static binary. Python is no longer needed.
 
 ### Homebrew (macOS, Linux)
 
@@ -79,305 +38,288 @@ cargo install --locked awspick
 
 ### GitHub Release
 
-Download `awspick-<version>-<target>.tar.gz` for your platform from the
-[releases page](https://github.com/KKamJi98/aws-profile-pick/releases), check it
-against `SHA256SUMS`, and put `awspick` on your `PATH`. Builds exist for macOS
-(arm64, x86_64) and Linux (x86_64, aarch64; statically linked with musl). Each
-release carries a build provenance attestation:
+Download an archive from [GitHub Releases](https://github.com/KKamJi98/aws-profile-pick/releases/latest), verify it against `SHA256SUMS`, and put `awspick` on your `PATH`.
+
+| Platform | Archive target |
+| --- | --- |
+| macOS, Apple Silicon | `aarch64-apple-darwin` |
+| macOS, Intel | `x86_64-apple-darwin` |
+| Linux, x86-64 | `x86_64-unknown-linux-musl` |
+| Linux, ARM64 | `aarch64-unknown-linux-musl` |
+
+Archives are named `awspick-<version>-<target>.tar.gz`. Linux binaries use musl. Windows and PowerShell are not supported. You can also verify the build provenance:
 
 ```bash
 gh attestation verify awspick-<version>-<target>.tar.gz --repo KKamJi98/aws-profile-pick
 ```
 
-Windows is not supported: awspick edits bash, zsh and fish rc files.
+<details>
+<summary>Moving from the Python / PyPI version (2.x)</summary>
 
-### Moving from the Python version (2.x)
+The PyPI package is `aws-profile-pick`; the Rust crate and executable are `awspick`. Python is no longer required. PyPI stops at 2.0.2 and receives no new releases.
 
-Versions up to 2.0.2 were published to PyPI as `aws-profile-pick`. 3.0.0 is a
-Rust rewrite with the same command, options and files, and PyPI gets no
-further releases. What changes for 2.x users:
-
-- `INFO:` log lines are printed only with `-v/--verbose`. stdout (the
-  `export` line) and the summary lines are unchanged, so `eval "$(awspick)"`
-  wrappers keep working.
-- New: `awspick <profile>`, `-V/--version`, `--completions <shell>`, profiles
-  from `~/.aws/credentials`, `AWS_CONFIG_FILE`, `ZDOTDIR`.
-- Bug fixes: fish lines are replaced instead of appended, unusual profile names
-  are quoted for the shell, backups in the same second no longer overwrite each
-  other, other `*.bak-*` files are no longer deleted, Ctrl-C/EOF and invalid
-  regexes no longer print tracebacks, `--help` works without a config, config
-  errors no longer echo the offending line, rc files keep CRLF and non-UTF-8
-  bytes, and the rc write is atomic. docs/rust-migration.md has the full list.
-
-Install the new binary first, then remove the old one:
+Install the binary first. If you installed the old version with `uv tool`, remove that installation and check which command is on your `PATH`:
 
 ```bash
-brew install KKamJi98/tap/awspick      # or: cargo install --locked awspick
+brew install KKamJi98/tap/awspick  # or: cargo install --locked awspick
 uv tool uninstall aws-profile-pick
-command -v awspick                     # should now point at brew or ~/.cargo/bin
+command -v awspick
+awspick --version
 ```
 
-To go back, `brew uninstall awspick` and `uv tool install aws-profile-pick==2.0.2`.
+Existing `eval "$(awspick)"` wrappers still work. `INFO:` logs now require `-v`. New options include direct profile selection, `--version`, and `--completions`. See the [migration record](https://github.com/KKamJi98/aws-profile-pick/blob/main/docs/rust-migration.md) for compatibility details and fixes. To return to the old uv installation, remove the Rust installation with its package manager and run `uv tool install aws-profile-pick==2.0.2`.
 
-## Usage
+</details>
 
-Simply run the command:
+## Quick start
 
-```bash
-awspick
-```
+Use profiles you have already configured. The names below are synthetic fixtures from the demo, not profiles awspick creates for you.
 
-Or name the profile to skip the table and the prompt (exact name first, then a
-unique case-insensitive match; filters and groups do not apply):
+For **bash or zsh**, define this helper in your current session. It preserves cancellation and failure status:
 
 ```bash
-awspick acme-dev
-```
-
-Other options:
-
-```bash
-awspick -v                     # also print INFO log lines
-awspick --version              # awspick <version>
-awspick --completions zsh      # print a completion script (bash, zsh, fish)
-```
-
-Completion scripts, for example:
-
-```bash
-awspick --completions bash > ~/.local/share/bash-completion/completions/awspick
-awspick --completions zsh > "${fpath[1]}/_awspick"
-awspick --completions fish > ~/.config/fish/completions/awspick.fish
-```
-
-Apply the selected profile immediately in the current shell:
-
-```bash
-eval "$(awspick)"
-```
-
-All prompts, summary lines and logs are printed to **stderr**, while the final
-`export AWS_PROFILE="..."` command is printed to **stdout**. This
-ensures the menu is visible when using command substitution.
-
-Add a wrapper function to your shell to avoid typing `eval` each time. `command awspick` avoids
-recursion if you name the function `awspick`:
-
-```bash
-function ap() {
-    eval "$(command awspick "$@")"
+ap() {
+  local output
+  output=$(command awspick "$@") || return $?
+  eval "$output"
 }
 ```
 
-This will:
-1. Display a list of available AWS profiles
-2. Prompt you to select a profile by number or name
-3. Update your shell configuration file to use the selected profile
-4. Create a backup of your original configuration file
+For fish, use the [fish wrapper](#fish) below. A plain `awspick` invocation still edits the rc file, but cannot change its parent shell's environment. The wrapper evaluates only the shell command on stdout; menus and status messages stay on stderr.
 
-Example output (stderr):
-```
-Enter profile number or name: 5
-Selected profile: acme-dev
-Backup created at /home/me/.zshrc.bak-20250605060000
-Updated /home/me/.zshrc with AWS_PROFILE=acme-dev
-Updated shared profile at /home/me/.config/awspick/profile
-Run 'eval "$(awspick)"' to apply in the current shell
-```
-
-## Sync across tabs and shells (recommended)
-
-By default, each shell session has its own environment. To keep multiple tabs or splits in sync,
-`awspick` writes the selected profile to `~/.config/awspick/profile`. Add a small hook so each
-shell reads that file on every prompt. The change will apply on the next prompt.
-
-### Bash
+### 1. Pick from an environment group
 
 ```bash
-# ~/.bashrc
+ap --groups dev  # enter 1 at the prompt
+printf 'AWS_PROFILE=%s\n' "$AWS_PROFILE"
+```
+
+stdout after the check:
+
+```text
+AWS_PROFILE=acme-dev-admin
+```
+
+Run `ap` without flags to see every group. Select by displayed number or profile name. Press Enter, enter `q` / `quit` / `exit`, or press Ctrl-C to cancel without selecting a profile.
+
+### 2. Switch directly by name
+
+```bash
+ap acme-stage-readonly
+printf 'AWS_PROFILE=%s\n' "$AWS_PROFILE"
+```
+
+```text
+AWS_PROFILE=acme-stage-readonly
+```
+
+The positional name skips the table and prompt. It uses an exact match first, then a unique case-insensitive match. **Filters and group restrictions do not apply to direct selection.**
+
+### 3. Filter with a regex, then select
+
+```bash
+ap --regex -f '^acme-prod-.*readonly$'  # enter 1 at the prompt
+printf 'AWS_PROFILE=%s\n' "$AWS_PROFILE"
+```
+
+The real menu on stderr (excerpt, before the prompt):
+
+```text
+┏━━━━━┳━━━━━━━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━┓
+┃ No. ┃ Profile            ┃ Group ┃ Current ┃
+┡━━━━━╇━━━━━━━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━┩
+│   1 │ acme-prod-readonly │ prod  │         │
+└─────┴────────────────────┴───────┴─────────┘
+```
+
+stdout after the check:
+
+```text
+AWS_PROFILE=acme-prod-readonly
+```
+
+These outputs were captured from the Rust binary in a throwaway HOME. The [demo fixtures and tape](https://github.com/KKamJi98/aws-profile-pick/tree/main/docs/demo) reproduce the workflow without credentials or AWS calls.
+
+## How it works
+
+![How awspick reads local profile names, groups them, persists the selection, and emits a shell command for the wrapper](https://raw.githubusercontent.com/KKamJi98/aws-profile-pick/main/docs/assets/how-it-works.svg)
+
+awspick discovers profile names in `~/.aws/config` and `~/.aws/credentials`, groups and filters them locally, and writes the selected name to the shell rc and shared profile file. Only the wrapper changes the current shell immediately. The source AWS files are not modified.
+
+## Command reference
+
+```text
+Usage: awspick [OPTIONS] [PROFILE]
+```
+
+| Argument / option | Behavior |
+| --- | --- |
+| `PROFILE` | Direct selection: exact name, otherwise a unique case-insensitive match. Ignores filters and groups. |
+| `-f, --filter <FILTER>` | Include profiles matching any substring. Repeat or comma-separate patterns. |
+| `-x, --exclude <EXCLUDE>` | Exclude profiles matching any substring. Repeat or comma-separate patterns. |
+| `-g, --groups <GROUPS>` | Display comma-separated group names, such as `prod,dev`. |
+| `--group-rules <GROUP_RULES>` | Set grouping rules and display order. |
+| `--regex` | Treat include/exclude patterns as regular expressions. |
+| `--case-sensitive` | Make include/exclude matching case-sensitive. |
+| `-v, --verbose` | Print `INFO:` log lines on stderr. |
+| `--completions <SHELL>` | Print a completion script and exit: `bash`, `zsh`, or `fish`. |
+| `-h, --help` | Print help. |
+| `-V, --version` | Print version. |
+
+The hidden legacy `--export-command` flag is accepted and ignored. It does **not** disable rc updates.
+
+### Group rules and defaults
+
+By default, groups appear in this order: `prod`, `stg`, `dev`, `preprod`, then unmatched `others`. Matching uses `-` / `_` token boundaries, so `prod` does not match `preprod`.
+
+```bash
+# Give "stage" its own group and put dev first, as in the demo.
+ap --group-rules 'dev=dev;stage=stage;prod=prod'
+
+# Show admin profiles, excluding sandbox names.
+ap -f admin -x sandbox
+```
+
+Rules use `name=keyword,keyword;name2=keyword`. The first matching explicit rule wins. `others` positions unmatched names; `main=*` does the same with a custom group name. Explicit keyword matches take priority over a catch-all even when the catch-all appears first.
+
+## Limits and file safety
+
+**There is no `--no-rc` or read-only selection mode in this release.** Evaluating stdout, redirecting stdout, or using `--export-command` does not prevent file writes. Do not use awspick if you require selection without rc changes; `--no-rc` is [planned, not implemented](https://github.com/KKamJi98/aws-profile-pick/blob/main/docs/ROADMAP.md).
+
+| Shell | File awspick edits | Managed assignment |
+| --- | --- | --- |
+| bash | `~/.bashrc` | `export AWS_PROFILE="<name>"` |
+| zsh | `$ZDOTDIR/.zshrc` when set; otherwise `~/.zshrc` | `export AWS_PROFILE="<name>"` |
+| fish | `~/.config/fish/config.fish` | `set -gx AWS_PROFILE "<name>"` |
+
+- Only column-zero literal assignments are managed. Matching lines are replaced; if none exist, awspick appends a `# Added by AWS Pick` block. Inline comments are kept. Indented lines and computed values such as `export AWS_PROFILE="$(cat ...)"` are left alone. Unusual names are shell-quoted.
+- Before an rc change, a backup is created **beside the rc file** as `<rc>.bak-YYYYmmddHHMMSS`, with `-1`, `-2`, etc. for collisions. awspick keeps **2 backups matching its naming format**; unrelated backup names are not rotated. Selecting an already-set profile skips the rc rewrite and new backup, but refreshes the shared profile file.
+- bash and zsh rc files must already exist. fish's config is created if missing. The shell is detected from `$SHELL`, otherwise the parent process; an unrecognized shell falls back to bash. Ensure `$SHELL` names the shell you want to configure.
+- awspick follows rc symlinks. It preserves file mode, owner/group where possible, and existing line endings. Atomic replacement has an in-place fallback; it is **not** a guarantee against every interrupted write. Extended attributes and ACLs are not copied. See the [write-safety notes and known edge cases](https://github.com/KKamJi98/aws-profile-pick/blob/main/docs/rust-migration.md#phase-3-bug-fixes).
+- The shared file is always `~/.config/awspick/profile`; it does not use `XDG_CONFIG_HOME`. Optional prompt hooks can overwrite a manual `AWS_PROFILE` change at the next prompt.
+- **Windows and PowerShell are not supported.** Selection is by number or name, not arrow keys or fuzzy search.
+- awspick does not use boto3. It parses local config/credentials files to discover section names, not to validate credentials. It does not check account access, perform SSO login, or call AWS. Broken credentials syntax is warned about and skipped; this is not a drop-in replacement for AWS CLI configuration validation.
+
+To undo a switch, select the previous profile. For an rc restore, use the backup path printed by awspick and review it before replacing the rc file. Restore/remove the shared profile file separately if you use sync hooks.
+
+## Shell integration and configuration
+
+Persist the helper in the relevant rc file only if you want it available in new shells. Keep it separate from the literal `AWS_PROFILE` assignment managed by awspick.
+
+### Bash and zsh
+
+Use the `ap()` function from [Quick start](#quick-start) in `~/.bashrc` or `~/.zshrc` (respect `$ZDOTDIR` for zsh).
+
+To sync tabs at their **next prompt**, optionally add this function to either shell's rc file:
+
+```bash
 awspick_sync() {
-  local f="$HOME/.config/awspick/profile"
-  if [ -f "$f" ]; then
-    export AWS_PROFILE="$(cat "$f")"
+  local file="$HOME/.config/awspick/profile"
+  if [ -f "$file" ]; then
+    export AWS_PROFILE="$(cat "$file")"
   fi
 }
+```
+
+Register the hook for your shell:
+
+```bash
+# bash, for a string-valued PROMPT_COMMAND:
 PROMPT_COMMAND="awspick_sync${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
 ```
 
-### Zsh
+If you already use an array-valued `PROMPT_COMMAND` on a bash version that supports it, append `awspick_sync` to that array instead of replacing it.
 
-```bash
-# ~/.zshrc
-awspick_sync() {
-  local f="$HOME/.config/awspick/profile"
-  if [ -f "$f" ]; then
-    export AWS_PROFILE="$(cat "$f")"
-  fi
-}
-precmd_functions+=(awspick_sync)
+```zsh
+# zsh:
+autoload -Uz add-zsh-hook
+add-zsh-hook precmd awspick_sync
 ```
 
 ### Fish
 
+Add to `~/.config/fish/config.fish`:
+
 ```fish
-# ~/.config/fish/config.fish
+function ap
+    set -l output (command awspick $argv)
+    set -l result $status
+    if test $result -ne 0
+        return $result
+    end
+    printf '%s\n' $output | source
+end
+
+# Optional: sync this shell on its next prompt.
 function awspick_sync --on-event fish_prompt
-    set -l f ~/.config/awspick/profile
-    if test -f $f
-        set -gx AWS_PROFILE (cat $f)
+    set -l file "$HOME/.config/awspick/profile"
+    if test -f "$file"
+        set -gx AWS_PROFILE (cat "$file")
     end
 end
 ```
 
-## Filtering and Grouping
+### Completions
 
-You can control which profiles are shown and how they are grouped.
-
-- `-f, --filter`: Only show profiles matching any given substring.
-- `-x, --exclude`: Exclude profiles matching any given substring.
-- `-g, --groups`: Only display specific groups (e.g., `prod,dev`).
-- `--group-rules`: Customize grouping rules. Order determines display order.
-- `--regex`: Treat `--filter`/`--exclude` as regular expressions.
-- `--case-sensitive`: Make matches case-sensitive.
-
-### Group rules syntax
-
-Rules are semicolon-separated: `name=keyword,keyword;name2=keyword`.
-Keywords match on token boundaries (`-`, `_`) so `prod` won't match `preprod`.
-
-| Syntax | Meaning |
-|---|---|
-| `tf=tf` | Profiles containing token `tf` → group `tf` |
-| `prod=prod,production` | Multiple keywords for one group |
-| `others` | Positional marker - unmatched profiles appear here |
-| `main=*` | Catch-all wildcard - same as `others` but with custom name |
-
-**Display order** follows the rule order. Unmatched profiles go to the catch-all group
-(`others` by default, appended at the end if not explicitly placed).
-
-**Matching priority**: explicit keyword rules are always evaluated before `*`/`others`,
-regardless of position. First matching explicit rule wins.
-
-Groups are visually separated by a divider line when the group changes.
-
-### Examples
+Homebrew installs bash, zsh, and fish completion scripts. For a Cargo or archive installation:
 
 ```bash
-# Show only prod and dev groups
-awspick --groups prod,dev
-
-# Show profiles containing "tooling" but not "legacy"
-awspick -f tooling -x legacy
-
-# Regex example: include profiles ending with -admin, exclude sandbox
-awspick --regex -f '.*-admin$' -x sandbox
-
-# Custom grouping: order ensures first match wins
-awspick --group-rules 'preprod=preprod;prod=prod,production;stg=stg;dev=dev'
-
-# Place unmatched profiles on top, infra profiles below
-awspick --group-rules 'others;infra=infra'
-
-# Same but rename the catch-all group to "app"
-awspick --group-rules 'app=*;infra=infra'
+# bash
+mkdir -p ~/.local/share/bash-completion/completions
+awspick --completions bash > ~/.local/share/bash-completion/completions/awspick
 ```
 
+```zsh
+# zsh: ensure this directory is in fpath before compinit runs.
+mkdir -p ~/.zfunc
+awspick --completions zsh > ~/.zfunc/_awspick
+# Add to .zshrc before any existing compinit call:
+fpath=(~/.zfunc $fpath)
+autoload -Uz compinit && compinit
 ```
-# Result of 'others;infra=infra' with profiles: api-dev, api-prod, infra-dev, infra-prod
-┏━━━━━┳━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━┓
-┃ No. ┃ Profile    ┃ Group  ┃ Current ┃
-┡━━━━━╇━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━┩
-│   1 │ api-dev    │ others │    *    │
-│   2 │ api-prod   │ others │         │
-├─────┼────────────┼────────┼─────────┤
-│   3 │ infra-dev  │ infra  │         │
-│   4 │ infra-prod │ infra  │         │
-└─────┴────────────┴────────┴─────────┘
+
+```fish
+# fish
+mkdir -p ~/.config/fish/completions
+awspick --completions fish > ~/.config/fish/completions/awspick.fish
 ```
+
+Completions cover options, not profile names.
 
 ### Environment variables
 
-```bash
-export AWSPICK_FILTER="tooling,admin"
-export AWSPICK_EXCLUDE="legacy"
-export AWSPICK_GROUPS_SHOW="prod,dev"
-export AWSPICK_GROUP_RULES='others;infra=infra'
-export AWSPICK_REGEX=0             # 1/true to enable regex
-export AWSPICK_CASE_SENSITIVE=0    # 1/true for case-sensitive
-```
+There is no separate awspick settings file. CLI values take priority over the corresponding nonempty filter/group environment defaults. Boolean flags or a truthy environment value enable regex/case-sensitive matching.
 
-## Development
+| Variable | Meaning |
+| --- | --- |
+| `AWS_CONFIG_FILE` | Override `~/.aws/config`. |
+| `AWS_SHARED_CREDENTIALS_FILE` | Override `~/.aws/credentials`. |
+| `AWS_PROFILE` | Current profile marker; otherwise awspick checks the detected shell's rc. |
+| `AWSPICK_FILTER` / `AWSPICK_EXCLUDE` | Comma-separated include/exclude patterns. |
+| `AWSPICK_GROUPS_SHOW` | Comma-separated groups to display. |
+| `AWSPICK_GROUP_RULES` | Semicolon-separated grouping rules. |
+| `AWSPICK_REGEX` / `AWSPICK_CASE_SENSITIVE` | Enabled by `1`, `true`, or `yes`, case-insensitively. Default: off. |
 
-```bash
-git clone https://github.com/KKamJi98/aws-profile-pick.git
-cd aws-profile-pick
-cargo test
-cargo fmt --all --check
-cargo clippy --all-targets -- -D warnings
-```
+## Companion tools
 
-`tests/golden` pins the behaviour of the Python release this binary replaced:
-`scripts/gen_golden.py` runs PyPI `aws-profile-pick` 2.0.2 over a corpus of
-configs, rc files, shells, options and inputs, and `tests/golden.rs` checks
-that the Rust binary produces the same stdout, stderr, exit code and files.
-Regenerate it with `uv run scripts/gen_golden.py`. docs/rust-migration.md
-lists the differences the corpus allows.
-
-## CI
-
-- `.github/workflows/ci.yml`: format, clippy and tests on Linux and macOS, `cargo deny`, and `cargo publish --dry-run`, for pull requests and branches other than `main`.
-- `.github/workflows/release-please.yml`: on every push to `main`, the same checks, then release-please (`release-type: rust`). Merging its release PR tags `v<version>` and creates the GitHub release.
-- `.github/workflows/release.yml`: on that tag, builds the four targets, attaches archives, `SHA256SUMS` and attestations to the release, publishes to crates.io through Trusted Publishing (environment `release`), and updates `Formula/awspick.rb` in KKamJi98/homebrew-tap.
-- Repository settings it relies on:
-  - variable `RELEASE_APP_CLIENT_ID` and secret `RELEASE_APP_PRIVATE_KEY`: the GitHub App release-please runs as
-  - secret `HOMEBREW_TAP_DEPLOY_KEY`: a deploy key with write access to KKamJi98/homebrew-tap
-  - environment `release`, limited to `v*` tags, named in the crates.io Trusted Publisher
-
-## Project Structure
-
-```
-aws-profile-pick/
-├── src/
-│   ├── main.rs         # Entry point
-│   ├── cli.rs          # Options and the overall flow
-│   ├── config.rs       # ~/.aws/config parsing, filtering, grouping
-│   ├── shell.rs        # Shell detection and rc file updates
-│   ├── table.rs        # The profile table
-│   ├── out.rs          # stdout/stderr and log lines
-│   └── py.rs           # Python behaviour the port has to match
-├── tests/              # Binary tests and golden fixtures
-├── scripts/            # Golden generator, Homebrew formula renderer
-├── docs/
-│   ├── rust-migration.md   # Port record, golden differences, bug fixes
-│   └── ROADMAP.md          # Planned features
-├── Cargo.toml
-└── README.md
-```
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+- **[wtree](https://github.com/KKamJi98/wtree)** (`wt`): manage many git worktrees from one bare clone - create, sync, and clean them up.
+- **[awspick](https://github.com/KKamJi98/aws-profile-pick)**: pick an AWS profile from a grouped, filterable list.
+- **[prjump](https://github.com/KKamJi98/prjump)** (`prj`): jump from the current branch to the new pull request page on GitHub or Bitbucket Cloud.
+- **[ssh-connector](https://github.com/KKamJi98/ssh-connector)**: pick a host from your `~/.ssh/config`, grouped, and connect.
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Open an issue or pull request. Use Conventional Commits and keep behavior changes covered by tests in a throwaway HOME, never your real shell configuration.
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes following the commit convention
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+```bash
+cargo fmt --all --check
+cargo clippy --all-targets --locked -- -D warnings
+cargo test --locked
+cargo deny check
+```
 
-## Commit Convention
+The [migration record](https://github.com/KKamJi98/aws-profile-pick/blob/main/docs/rust-migration.md) explains golden fixtures and compatibility. The [roadmap](https://github.com/KKamJi98/aws-profile-pick/blob/main/docs/ROADMAP.md) lists planned work. Demo source, synthetic setup, and recording instructions live in [docs/demo](https://github.com/KKamJi98/aws-profile-pick/tree/main/docs/demo).
 
-This project follows the Conventional Commits specification:
+## License
 
-- `feat`: A new feature
-- `fix`: A bug fix
-- `docs`: Documentation only changes
-- `style`: Changes that do not affect the meaning of the code
-- `refactor`: A code change that neither fixes a bug nor adds a feature
-- `test`: Adding missing tests or correcting existing tests
-- `chore`: Changes to the build process or auxiliary tools
-
-Example: `feat(cli): implement number and name selection logic`
+[MIT](https://github.com/KKamJi98/aws-profile-pick/blob/main/LICENSE).
