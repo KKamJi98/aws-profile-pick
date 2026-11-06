@@ -279,10 +279,17 @@ impl Matcher {
                     let re = fancy_regex::RegexBuilder::new(p)
                         .case_insensitive(!self.case_sensitive)
                         .build()
-                        .map_err(|e| e.to_string())?;
+                        .map_err(|e| format!("invalid regex {}: {e}", py::repr_str(p)))?;
                     self.cache.insert(p.clone(), re);
                 }
-                if self.cache[p].is_match(text).map_err(|e| e.to_string())? {
+                let matched = self.cache[p].is_match(text).map_err(|e| {
+                    format!(
+                        "regex {} failed on {}: {e}",
+                        py::repr_str(p),
+                        py::repr_str(text)
+                    )
+                })?;
+                if matched {
                     return Ok(true);
                 }
             }

@@ -596,3 +596,15 @@ fn end_of_input_cancels_like_an_empty_answer() {
         assert!(stdout(&o).is_empty());
     }
 }
+
+/// Bug 7: an invalid --regex pattern raised re.error with a traceback.
+#[test]
+fn invalid_regex_is_reported_plainly() {
+    let h = Home::new(Some(CFG));
+    h.write(".zshrc", "");
+    let o = h.run("/bin/zsh", &["--regex", "-f", "("], "1\n");
+    assert_eq!(o.status.code(), Some(1));
+    let e = stderr(&o);
+    assert!(e.contains("ERROR: invalid regex '(': "), "{e}");
+    assert!(!e.contains("unexpected error"), "{e}");
+}

@@ -244,7 +244,11 @@ fn run_with_home(home: &Path) -> i32 {
     };
     let grouped = match config::get_grouped_profiles(&profiles, &opts) {
         Ok(g) => g,
-        Err(msg) => return unexpected(&msg),
+        Err(msg) => {
+            // 2.x let re.error escape with a traceback.
+            out::error(&msg);
+            return 1;
+        }
     };
     let current = shell::get_current_profile(home);
     table::display(&grouped, current.as_deref());
