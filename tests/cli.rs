@@ -471,7 +471,9 @@ fn fish_switch_replaces_the_existing_line() {
 #[test]
 fn backslash_in_profile_name_is_written_literally() {
     let h = Home::new(Some(
-        "[profile a\\1]\n[profile b\\yz]\n[profile c$1]\n[profile d]\n",
+        // Single-quoted so that shlex (the AWS CLI's section rules) keeps
+        // the backslash.
+        "[profile 'a\\1']\n[profile 'b\\yz']\n[profile 'c$1']\n[profile d]\n",
     ));
     for name in ["a\\1", "b\\yz", "c$1"] {
         h.write(".zshrc", "export AWS_PROFILE=\"d\"\n");
@@ -491,8 +493,8 @@ fn backslash_in_profile_name_is_written_literally() {
 /// parsed.
 #[test]
 fn profile_names_are_quoted_for_the_shell() {
-    let config = "[profile x$(touch PWNED)]\n[profile y\";touch PWN2;\"]\n[profile it's]\n\
-                  [profile back`touch PWN3`]\n[profile \"a b\"]\n[profile c\\d]\n";
+    let config = "[profile \"x$(touch PWNED)\"]\n[profile y\";touch PWN2;\"]\n[profile \"it's\"]\n\
+                  [profile \"back`touch PWN3`\"]\n[profile \"a b\"]\n[profile 'c\\d']\n";
     let h = Home::new(Some(config));
     for n in 1..=6 {
         h.write(".zshrc", "");
@@ -701,4 +703,55 @@ fn help_and_usage_errors_do_not_need_a_config() {
     assert!(stdout(&o).contains("--filter"));
     assert!(stderr(&o).is_empty(), "{}", stderr(&o));
     assert_eq!(h.run("/bin/zsh", &["--bogus"], "").status.code(), Some(2));
+}
+
+/// Bug 13: ~/.aws/config was the only place looked at, and section names
+/// were cut at a fixed offset, unlike the AWS CLI.
+#[test]
+fn profiles_follow_the_aws_cli() {
+    let h = Home::new(Some("[profile home-only]\n"));
+    h.write(
+        "alt/config",
+        "[default]\n[profile default]\n[profile  two-spaces]\n[profile \"quoted name\"]\n\
+         [profile a b]\n[profile 'it''s']\n[profileX]\n[sso-session s]\n",
+    );
+    h.write(".zshrc", "");
+    let o = run_with(
+        h.cmd(Some("/bin/zsh"))
+            .env("AWS_CONFIG_FILE", "~/alt/config"),
+        "q\n",
+    );
+    let e = stderr(&o);
+    assert!(e.contains("INFO: Found 4 AWS profiles"), "{e}");
+    let names: Vec<&str> = e
+        .lines()
+        .filter(|l| l.starts_with('│'))
+        .map(|l| l.split('│').nth(2).unwrap().trim())
+        .collect();
+    assert_eq!(
+        names,
+        ["default", "its", "quoted name", "two-spaces"],
+        "{e}"
+    );
+    assert!(!e.contains("home-only"));
+
+    let aws = Command::new("aws")
+        .args(["configure", "list-profiles"])
+        .env_clear()
+        .env("PATH", "/usr/bin:/bin:/opt/homebrew/bin:/usr/local/bin")
+        .env("HOME", &h.path)
+        .env("AWS_CONFIG_FILE", h.path.join("alt/config"))
+        .env("AWS_SHARED_CREDENTIALS_FILE", h.path.join("none"))
+        .output();
+    // When the AWS CLI is installed, it must agree.
+    if let Ok(out) = aws
+        && out.status.success()
+    {
+        let mut cli: Vec<String> = String::from_utf8_lossy(&out.stdout)
+            .lines()
+            .map(str::to_owned)
+            .collect();
+        cli.sort();
+        assert_eq!(cli, names, "aws configure list-profiles");
+    }
 }

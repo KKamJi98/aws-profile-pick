@@ -14,8 +14,107 @@ use regex::Regex;
 use crate::out;
 use crate::py;
 
+/// The config file the AWS CLI reads: `$AWS_CONFIG_FILE` (with `~` and
+/// `$VAR` expanded, as botocore does), else `~/.aws/config`. 2.x ignored
+/// `AWS_CONFIG_FILE`.
 pub fn aws_config_path(home: &Path) -> PathBuf {
-    home.join(".aws").join("config")
+    match std::env::var("AWS_CONFIG_FILE") {
+        Ok(p) if !p.is_empty() => expand_user(&expand_vars(&p), home),
+        _ => home.join(".aws").join("config"),
+    }
+}
+
+/// `os.path.expanduser` for the current user only.
+fn expand_user(p: &str, home: &Path) -> PathBuf {
+    if p == "~" {
+        home.to_path_buf()
+    } else if let Some(rest) = p.strip_prefix("~/") {
+        home.join(rest)
+    } else {
+        PathBuf::from(p)
+    }
+}
+
+/// `os.path.expandvars`: `$NAME` and `${NAME}`; unknown names stay as is.
+fn expand_vars(p: &str) -> String {
+    let re = Regex::new(r"\$(\w+|\{[^}]*\})").expect("static pattern");
+    re.replace_all(p, |c: &regex::Captures| {
+        let name = c[1].trim_start_matches('{').trim_end_matches('}');
+        std::env::var(name).unwrap_or_else(|_| c[0].to_owned())
+    })
+    .into_owned()
+}
+
+/// `shlex.split` (POSIX mode, no comments). `None` where Python raises
+/// ValueError (an open quote or a trailing backslash).
+fn shlex_split(s: &str) -> Option<Vec<String>> {
+    let mut words = Vec::new();
+    let mut cur = String::new();
+    let mut in_word = false;
+    let mut chars = s.chars();
+    while let Some(c) = chars.next() {
+        match c {
+            ' ' | '\t' | '\r' | '\n' => {
+                if in_word {
+                    words.push(std::mem::take(&mut cur));
+                    in_word = false;
+                }
+            }
+            '\'' => {
+                in_word = true;
+                loop {
+                    match chars.next()? {
+                        '\'' => break,
+                        ch => cur.push(ch),
+                    }
+                }
+            }
+            '"' => {
+                in_word = true;
+                loop {
+                    match chars.next()? {
+                        '"' => break,
+                        '\\' => match chars.next()? {
+                            e @ ('"' | '\\') => cur.push(e),
+                            e => {
+                                cur.push('\\');
+                                cur.push(e);
+                            }
+                        },
+                        ch => cur.push(ch),
+                    }
+                }
+            }
+            '\\' => {
+                in_word = true;
+                cur.push(chars.next()?);
+            }
+            ch => {
+                in_word = true;
+                cur.push(ch);
+            }
+        }
+    }
+    if in_word {
+        words.push(cur);
+    }
+    Some(words)
+}
+
+/// The profile a section names under botocore's rules
+/// (`configloader.build_profile_map`): `default`, or a section starting with
+/// `profile` that shlex splits into exactly two words, the second being the
+/// name. So `[profile  a]` is `a`, `[profile "a b"]` is `a b`, and
+/// `[profile a b]` is not a profile.
+fn profile_name(section: &str) -> Option<String> {
+    if section.starts_with("profile") {
+        let parts = shlex_split(section)?;
+        if parts.len() == 2 {
+            return parts.into_iter().nth(1);
+        }
+        return None;
+    }
+    (section == "default").then(|| "default".to_owned())
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -204,12 +303,14 @@ pub fn read_aws_profiles(path: &Path) -> Vec<String> {
             }
         }
     };
+    // Each name once, as in botocore's profile map: [default] and
+    // [profile default] are the same profile.
     let mut profiles: Vec<String> = Vec::new();
     for section in sections {
-        if section == "default" {
-            profiles.push("default".to_owned());
-        } else if let Some(name) = section.strip_prefix("profile ") {
-            profiles.push(name.to_owned());
+        if let Some(name) = profile_name(&section)
+            && !profiles.contains(&name)
+        {
+            profiles.push(name);
         }
     }
     out::info(&format!("Found {} AWS profiles", profiles.len()));
@@ -611,5 +712,31 @@ mod tests {
             };
             assert_eq!(got, want, "text: {:?}", c["text"]);
         }
+    }
+
+    #[test]
+    fn profile_names_follow_botocore() {
+        let n = |s: &str| profile_name(s);
+        assert_eq!(n("default"), Some("default".into()));
+        assert_eq!(n("profile default"), Some("default".into()));
+        assert_eq!(n("profile  two"), Some("two".into()));
+        assert_eq!(n("profile \"a b\""), Some("a b".into()));
+        assert_eq!(n("profile 'it''s'"), Some("its".into()));
+        assert_eq!(n("profile a[b]"), Some("a[b]".into()));
+        assert_eq!(n("profilefoo bar"), Some("bar".into()));
+        assert_eq!(n("profile a b"), None);
+        assert_eq!(n("profile \"open"), None);
+        assert_eq!(n("profileX"), None);
+        assert_eq!(n(" profile x"), None);
+        assert_eq!(n("sso-session s"), None);
+    }
+
+    #[test]
+    fn shlex_matches_python() {
+        assert_eq!(shlex_split("a\"b c\"d").unwrap(), vec!["ab cd"]);
+        assert_eq!(shlex_split("\"a\\\"b\\x\"").unwrap(), vec!["a\"b\\x"]);
+        assert_eq!(shlex_split("a\\ b").unwrap(), vec!["a b"]);
+        assert_eq!(shlex_split("x \\"), None);
+        assert_eq!(shlex_split("''").unwrap(), vec![""]);
     }
 }
