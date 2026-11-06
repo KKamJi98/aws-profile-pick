@@ -1,0 +1,2798 @@
+[
+ {
+  "name": "select_by_number",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": "alias a=b\n"
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "5\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "select_by_name",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": "alias a=b\n"
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "acme-dev\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "select_case_insensitive",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "ACME-DEV\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "select_leading_zero",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "  007 \n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "select_empty_line",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "select_quit",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "QUIT\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "select_invalid_then_valid",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "zzz\n0\n99\n2\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "select_eof",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": ""
+   }
+  ],
+  "compare": [
+   "stdout",
+   "exit",
+   "files"
+  ],
+  "note": "Python prints a traceback for EOFError; Rust prints the error line only",
+  "same_second": false
+ },
+ {
+  "name": "select_eof_after_invalid",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "nope\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "exit",
+   "files"
+  ],
+  "note": "Python prints a traceback for EOFError",
+  "same_second": false
+ },
+ {
+  "name": "select_fullwidth_digit",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "２\nq\n"
+   }
+  ],
+  "compare": [],
+  "note": "Unicode digits: Python int() accepts U+FF12, Rust takes ASCII digits only",
+  "same_second": false
+ },
+ {
+  "name": "select_superscript_digit",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "²\nq\n"
+   }
+  ],
+  "compare": [],
+  "note": "Unicode digits: Python crashes in int('²')",
+  "same_second": false
+ },
+ {
+  "name": "current_from_env",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh",
+   "AWS_PROFILE": " ACME-STG "
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "current_from_rc",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": "export AWS_PROFILE='acme-dev-admin'\n"
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "current_env_blank_falls_back_to_rc",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": "export AWS_PROFILE=sandbox\n"
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh",
+   "AWS_PROFILE": "   "
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "rc_missing_zsh",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n"
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "1\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "rc_missing_bash",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n"
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/bash"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "1\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "rc_empty",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "1\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "rc_same_profile_unchanged",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": "export AWS_PROFILE=\"acme-dev\"\n"
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "acme-dev\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "rc_replace",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": "x=1\nexport AWS_PROFILE=\"acme-prod\"\ny=2\n"
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "acme-dev\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "rc_replace_all_matches",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": "export AWS_PROFILE=a\nexport  AWS_PROFILE=b\n"
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "acme-dev\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "rc_sync_hook_preserved",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": "export AWS_PAGER=\"\"\nexport AWS_PROFILE=\"company\"\nawspick_sync() {\n  local f=\"$HOME/.config/awspick/profile\"\n  if [ -f \"$f\" ]; then\n    export AWS_PROFILE=\"$(cat \"$f\")\"\n  fi\n}\nprecmd_functions+=(awspick_sync)\n"
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "acme-dev\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "rc_inline_comment",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": "export AWS_PROFILE=acme-prod # pinned\n"
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "acme-dev\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "rc_unindented_dynamic_line",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": "export AWS_PROFILE=\"$(cat ~/.config/awspick/profile)\"\n"
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "acme-dev\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "rc_trailing_whitespace_append",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": "alias a=b\n\n\n  \t\n"
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "1\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "rc_crlf",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": "alias a=b\r\nexport AWS_PROFILE=\"acme-prod\"\r\n"
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "acme-dev\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "rc_non_utf8",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": {
+    "b64": "YWxpYXMgY2Fm6T1iCmV4cG9ydCBBV1NfUFJPRklMRT0iYWNtZS1wcm9kIgo="
+   }
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "acme-dev\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "exit",
+   "files"
+  ],
+  "note": "Python logs the UnicodeDecodeError with a traceback",
+  "same_second": false
+ },
+ {
+  "name": "rc_symlink_mode_600",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   "dotfiles/zshrc": "alias a=b\n",
+   ".zshrc": {
+    "symlink": "dotfiles/zshrc"
+   }
+  },
+  "modes": {
+   "dotfiles/zshrc": "600"
+  },
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "1\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "rc_backup_rotation",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": "x\n",
+   ".zshrc.bak-20240101000000": "OLD1\n",
+   ".zshrc.bak-20250101000000": "OLD2\n",
+   ".zshrc.bak-0-before-migration": "MANUAL\n"
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "1\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "rc_backup_same_second",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": "ORIGINAL\n"
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "1\n"
+   },
+   {
+    "args": [],
+    "stdin": "2\n"
+   },
+   {
+    "args": [],
+    "stdin": "3\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": true
+ },
+ {
+  "name": "rc_shell_injection_kept",
+  "files": {
+   ".aws/config": "[profile x$(touch PWNED)]\n[profile y\";touch PWN2;\"]\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "2\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "shell_bash",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".bashrc": "export AWS_PROFILE=\"acme-prod\"\n"
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/opt/homebrew/bin/bash"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "acme-dev\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "shell_fish_create",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n"
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/usr/local/bin/fish"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "acme-dev\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "shell_fish_repeat_appends",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".config/fish/config.fish": "set -gx PATH x\n"
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/usr/local/bin/fish"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "1\n"
+   },
+   {
+    "args": [],
+    "stdin": "2\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": true
+ },
+ {
+  "name": "shell_fish_set_x_detected",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".config/fish/config.fish": "set -x AWS_PROFILE 'acme-prod'\n"
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/usr/local/bin/fish"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "acme-dev\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "shell_unknown_falls_back_to_bash",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".bashrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/usr/bin/nu"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "1\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "shell_uppercase_name",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/ZSH5"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "1\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "shell_unset_uses_parent",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".bashrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": null
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "1\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "shell_empty",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".bashrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": ""
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "1\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "shell_trailing_slash",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".bashrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh/"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "1\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "shell_zdotdir_ignored",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   "zdot/.zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh",
+   "ZDOTDIR": "zdot"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "1\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "filter_substring",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [
+     "-f",
+     "admin"
+    ],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "filter_repeat_and_csv",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [
+     "-f",
+     "prod",
+     "-f",
+     "sandbox, ,dev"
+    ],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "filter_attached_and_equals",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [
+     "-fstg",
+     "-x=admin"
+    ],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "filter_case_sensitive",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [
+     "--case-sensitive",
+     "-f",
+     "ACME"
+    ],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "filter_regex",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [
+     "--regex",
+     "-f",
+     ".*-admin$",
+     "-x",
+     "stg"
+    ],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "filter_regex_lookahead",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [
+     "--regex",
+     "-f",
+     "^(?!acme)"
+    ],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "filter_regex_invalid",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [
+     "--regex",
+     "-f",
+     "("
+    ],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "exit",
+   "files"
+  ],
+  "note": "Python prints a traceback for re.error",
+  "same_second": false
+ },
+ {
+  "name": "filter_no_match",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [
+     "-f",
+     "zzz"
+    ],
+    "stdin": "1\nq\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "groups_show",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [
+     "-g",
+     "prod,dev"
+    ],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "groups_last_wins",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [
+     "-g",
+     "prod",
+     "-g",
+     "dev"
+    ],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "groups_only_commas",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [
+     "-g",
+     ",,"
+    ],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "group_rules_others_first",
+  "files": {
+   ".aws/config": "[profile api-dev]\n[profile api-prod]\n[profile infra-dev]\n[profile infra-prod]\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [
+     "--group-rules",
+     "others;infra=infra"
+    ],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "group_rules_wildcard_rename",
+  "files": {
+   ".aws/config": "[profile api-dev]\n[profile api-prod]\n[profile infra-dev]\n[profile infra-prod]\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [
+     "--group-rules",
+     "app=*;infra=infra"
+    ],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "group_rules_duplicate_name",
+  "files": {
+   ".aws/config": "[profile api-dev]\n[profile api-prod]\n[profile infra-dev]\n[profile infra-prod]\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [
+     "--group-rules",
+     "a=api;a=infra"
+    ],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "group_rules_custom_names",
+  "files": {
+   ".aws/config": "[profile api-dev]\n[profile api-prod]\n[profile infra-dev]\n[profile infra-prod]\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [
+     "--group-rules",
+     "prd=prod;dv=dev"
+    ],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "abbreviated_long_options",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [
+     "--case",
+     "--reg",
+     "--fil",
+     "acme-.*-admin"
+    ],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "flag_repeated",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [
+     "--regex",
+     "--regex",
+     "-f",
+     "dev$"
+    ],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "export_command_ignored",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [
+     "--export-command"
+    ],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "env_filter_exclude",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh",
+   "AWSPICK_FILTER": "acme",
+   "AWSPICK_EXCLUDE": "admin"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "env_filter_empty_parts",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh",
+   "AWSPICK_FILTER": "zzz,,"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "env_cli_overrides",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh",
+   "AWSPICK_FILTER": "zzz"
+  },
+  "runs": [
+   {
+    "args": [
+     "-f",
+     "sandbox"
+    ],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "env_groups_rules",
+  "files": {
+   ".aws/config": "[profile api-dev]\n[profile api-prod]\n[profile infra-dev]\n[profile infra-prod]\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh",
+   "AWSPICK_GROUP_RULES": "others;infra=infra",
+   "AWSPICK_GROUPS_SHOW": "infra"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "env_regex_case",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh",
+   "AWSPICK_REGEX": "TRUE",
+   "AWSPICK_CASE_SENSITIVE": "yes",
+   "AWSPICK_FILTER": "^acme-(dev|STG)$"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "usage_ambiguous_option",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n"
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [
+     "--grou",
+     "prod"
+    ],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "exit",
+   "files"
+  ],
+  "note": "argparse and clap word usage errors differently",
+  "same_second": false
+ },
+ {
+  "name": "usage_ambiguous_hidden_option",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n"
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [
+     "--ex",
+     "dev"
+    ],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "exit",
+   "files"
+  ],
+  "note": "argparse and clap word usage errors differently",
+  "same_second": false
+ },
+ {
+  "name": "usage_positional",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n"
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [
+     "extra"
+    ],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "exit",
+   "files"
+  ],
+  "note": "argparse and clap word usage errors differently",
+  "same_second": false
+ },
+ {
+  "name": "usage_version_unknown",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n"
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [
+     "--version"
+    ],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "exit",
+   "files"
+  ],
+  "note": "argparse and clap word usage errors differently",
+  "same_second": false
+ },
+ {
+  "name": "usage_missing_value",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n"
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [
+     "-f"
+    ],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "exit",
+   "files"
+  ],
+  "note": "argparse and clap word usage errors differently",
+  "same_second": false
+ },
+ {
+  "name": "help",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n"
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [
+     "-h"
+    ],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "exit",
+   "files"
+  ],
+  "note": "help text layout differs; options are checked by a separate test",
+  "same_second": false
+ },
+ {
+  "name": "help_without_config",
+  "files": {},
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [
+     "--help"
+    ],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "bad_option_without_config",
+  "files": {},
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [
+     "--bogus"
+    ],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "config_missing",
+  "files": {
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "config_is_directory",
+  "files": {
+   ".aws/config": {
+    "dir": true
+   },
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "config_empty",
+  "files": {
+   ".aws/config": "",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "config_only_sso",
+  "files": {
+   ".aws/config": "[sso-session a]\nx=1\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "config_section_edge_cases",
+  "files": {
+   ".aws/config": "[default]\n[profile default]\n[profile  two-spaces]\n[profile \"quoted name\"]\n[profileX]\n[ profile lead]\n[sso-session s]\n[services svc]\n[DEFAULT]\nregion=x\n[profile trail] ; comment\n[]]\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "config_select_spaced_name",
+  "files": {
+   ".aws/config": "[profile  two-spaces]\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "1\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "config_comments_continuations",
+  "files": {
+   ".aws/config": "# top comment\n; another\n[profile a]\nregion = x\n  [profile hidden]\ncredential_process = cmd\n    --flag\n\n[profile b]\n  indented_option = y\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "config_crlf",
+  "files": {
+   ".aws/config": "[profile a]\r\nregion=x\r\n[profile b]\r\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "config_bom",
+  "files": {
+   ".aws/config": "﻿[profile a]\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "exit",
+   "files"
+  ],
+  "note": "configparser prints the offending line; Rust does not",
+  "same_second": false
+ },
+ {
+  "name": "config_duplicate_option",
+  "files": {
+   ".aws/config": "[profile a]\nregion=x\nRegion = y\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "config_duplicate_section",
+  "files": {
+   ".aws/config": "[profile a]\n[profile b]\n[profile a]\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "config_option_before_section",
+  "files": {
+   ".aws/config": "region=x\n[profile a]\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "exit",
+   "files"
+  ],
+  "note": "configparser prints the offending line; Rust does not",
+  "same_second": false
+ },
+ {
+  "name": "config_parse_error_secret_line",
+  "files": {
+   ".aws/config": "[profile a]\nregion=x\nwJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\n=novalue\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "exit",
+   "files"
+  ],
+  "note": "configparser prints the offending line; Rust does not",
+  "same_second": false
+ },
+ {
+  "name": "config_non_utf8",
+  "files": {
+   ".aws/config": {
+    "b64": "W3Byb2ZpbGUgY2Fm6V0K"
+   },
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "config_empty_option_name_twice",
+  "files": {
+   ".aws/config": "[profile a]\n=1\n=2\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "table_many_profiles",
+  "files": {
+   ".aws/config": "[profile team01-dev]\n[profile team02-dev]\n[profile team03-dev]\n[profile team04-dev]\n[profile team05-dev]\n[profile team06-dev]\n[profile team07-dev]\n[profile team08-dev]\n[profile team09-dev]\n[profile team10-dev]\n[profile team11-dev]\n[profile team12-dev]\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "12\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "table_unicode_names",
+  "files": {
+   ".aws/config": "[profile 한글-dev]\n[profile ＡＢ-prod]\n[profile café]\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "table_wide_80",
+  "files": {
+   ".aws/config": "[profile a-very-long-profile-name-for-the-production-account-xa-very-long-profile-name-for-the-production-account-x]\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "exit",
+   "files"
+  ],
+  "note": "rich folds tables wider than the terminal; Rust does not",
+  "same_second": false
+ },
+ {
+  "name": "table_wide_columns_200",
+  "files": {
+   ".aws/config": "[profile a-very-long-profile-name-for-the-production-account-xa-very-long-profile-name-for-the-production-account-x]\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh",
+   "COLUMNS": "200"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "table_markup_like_names",
+  "files": {
+   ".aws/config": "[profile team[red]x]\n[profile a[/b]]\n[profile a[b]]\n[profile ok]\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "exit",
+   "files"
+  ],
+  "note": "rich parsed cell text as markup (bug 9)",
+  "same_second": false
+ },
+ {
+  "name": "table_backslash_name",
+  "files": {
+   ".aws/config": "[profile a\\1]\n[profile c]\n",
+   ".zshrc": "export AWS_PROFILE=\"c\"\n"
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh"
+  },
+  "runs": [
+   {
+    "args": [],
+    "stdin": "a\\1\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit"
+  ],
+  "note": "re.sub expanded \\1 in the replacement (bug 2)",
+  "same_second": false
+ },
+ {
+  "name": "color_standard",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n[profile x-preprod]\n[profile y-weird]\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh",
+   "FORCE_COLOR": "1",
+   "TERM": "xterm",
+   "AWS_PROFILE": "acme-dev"
+  },
+  "runs": [
+   {
+    "args": [
+     "--group-rules",
+     "prod=prod;stg=stg;dev=dev;preprod=preprod;weird=weird"
+    ],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "color_256color",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n[profile x-preprod]\n[profile y-weird]\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh",
+   "FORCE_COLOR": "1",
+   "TERM": "xterm-256color",
+   "AWS_PROFILE": "acme-dev"
+  },
+  "runs": [
+   {
+    "args": [
+     "--group-rules",
+     "prod=prod;stg=stg;dev=dev;preprod=preprod;weird=weird"
+    ],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "color_truecolor",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n[profile x-preprod]\n[profile y-weird]\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh",
+   "FORCE_COLOR": "1",
+   "COLORTERM": "truecolor",
+   "TERM": "xterm-256color",
+   "AWS_PROFILE": "acme-dev"
+  },
+  "runs": [
+   {
+    "args": [
+     "--group-rules",
+     "prod=prod;stg=stg;dev=dev;preprod=preprod;weird=weird"
+    ],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "color_16color",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n[profile x-preprod]\n[profile y-weird]\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh",
+   "FORCE_COLOR": "1",
+   "TERM": "xterm-16color",
+   "AWS_PROFILE": "acme-dev"
+  },
+  "runs": [
+   {
+    "args": [
+     "--group-rules",
+     "prod=prod;stg=stg;dev=dev;preprod=preprod;weird=weird"
+    ],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "color_kitty",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n[profile x-preprod]\n[profile y-weird]\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh",
+   "FORCE_COLOR": "1",
+   "TERM": "xterm-kitty",
+   "AWS_PROFILE": "acme-dev"
+  },
+  "runs": [
+   {
+    "args": [
+     "--group-rules",
+     "prod=prod;stg=stg;dev=dev;preprod=preprod;weird=weird"
+    ],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "color_no_term",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n[profile x-preprod]\n[profile y-weird]\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh",
+   "FORCE_COLOR": "1",
+   "AWS_PROFILE": "acme-dev"
+  },
+  "runs": [
+   {
+    "args": [
+     "--group-rules",
+     "prod=prod;stg=stg;dev=dev;preprod=preprod;weird=weird"
+    ],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "color_no_color",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n[profile x-preprod]\n[profile y-weird]\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh",
+   "FORCE_COLOR": "1",
+   "TERM": "xterm",
+   "NO_COLOR": "",
+   "AWS_PROFILE": "acme-dev"
+  },
+  "runs": [
+   {
+    "args": [
+     "--group-rules",
+     "prod=prod;stg=stg;dev=dev;preprod=preprod;weird=weird"
+    ],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "color_dumb",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n[profile x-preprod]\n[profile y-weird]\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh",
+   "FORCE_COLOR": "1",
+   "TERM": "dumb",
+   "AWS_PROFILE": "acme-dev"
+  },
+  "runs": [
+   {
+    "args": [
+     "--group-rules",
+     "prod=prod;stg=stg;dev=dev;preprod=preprod;weird=weird"
+    ],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "color_empty_list",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh",
+   "FORCE_COLOR": "1",
+   "TERM": "xterm"
+  },
+  "runs": [
+   {
+    "args": [
+     "-f",
+     "zzz"
+    ],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ },
+ {
+  "name": "color_empty_list_no_color",
+  "files": {
+   ".aws/config": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n",
+   ".zshrc": ""
+  },
+  "modes": {},
+  "env": {
+   "PATH": "/usr/bin:/bin",
+   "SHELL": "/bin/zsh",
+   "FORCE_COLOR": "1",
+   "TERM": "xterm",
+   "NO_COLOR": "1"
+  },
+  "runs": [
+   {
+    "args": [
+     "-f",
+     "zzz"
+    ],
+    "stdin": "q\n"
+   }
+  ],
+  "compare": [
+   "stdout",
+   "stderr",
+   "exit",
+   "files"
+  ],
+  "note": null,
+  "same_second": false
+ }
+]

@@ -1,0 +1,50 @@
+{
+ "runs": [
+  {
+   "stdout": "export AWS_PROFILE=\"acme-dev\"\n",
+   "stderr": "INFO: Found 8 AWS profiles\nINFO: Detected shell from SHELL env var: zsh\nINFO: Using zsh configuration at <HOME>/.zshrc\n                AWS Profiles                \n┏━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━┓\n┃ No. ┃ Profile         ┃ Group  ┃ Current ┃\n┡━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━┩\n│   1 │ acme-prod       │ prod   │         │\n│   2 │ acme-prod-admin │ prod   │         │\n├─────┼─────────────────┼────────┼─────────┤\n│   3 │ acme-stg        │ stg    │         │\n│   4 │ acme-stg-admin  │ stg    │         │\n├─────┼─────────────────┼────────┼─────────┤\n│   5 │ acme-dev        │ dev    │         │\n│   6 │ acme-dev-admin  │ dev    │         │\n├─────┼─────────────────┼────────┼─────────┤\n│   7 │ default         │ others │         │\n│   8 │ sandbox         │ others │         │\n└─────┴─────────────────┴────────┴─────────┘\nEnter profile number or name: Selected profile: acme-dev\nINFO: Detected shell from SHELL env var: zsh\nINFO: Using zsh configuration at <HOME>/.zshrc\nINFO: Using zsh configuration at <HOME>/.zshrc\nINFO: Backup created at <HOME>/.zshrc.bak-20261106231040\nINFO: Replacing existing AWS_PROFILE=company with acme-dev\nINFO: Successfully updated <HOME>/.zshrc with AWS_PROFILE=acme-dev\nBackup created at <HOME>/.zshrc.bak-20261106231040\nUpdated <HOME>/.zshrc with AWS_PROFILE=acme-dev\nINFO: Wrote shared profile to <HOME>/.config/awspick/profile\nUpdated shared profile at <HOME>/.config/awspick/profile\nINFO: Using zsh configuration at <HOME>/.zshrc\nRun 'eval \"$(awspick)\"' to apply in the current shell\n",
+   "exit": 0
+  }
+ ],
+ "files": [
+  {
+   "path": ".aws",
+   "type": "dir",
+   "mode": "755"
+  },
+  {
+   "path": ".aws/config",
+   "type": "file",
+   "mode": "644",
+   "content": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n"
+  },
+  {
+   "path": ".config",
+   "type": "dir",
+   "mode": "755"
+  },
+  {
+   "path": ".config/awspick",
+   "type": "dir",
+   "mode": "755"
+  },
+  {
+   "path": ".config/awspick/profile",
+   "type": "file",
+   "mode": "644",
+   "content": "acme-dev\n"
+  },
+  {
+   "path": ".zshrc",
+   "type": "file",
+   "mode": "644",
+   "content": "export AWS_PAGER=\"\"\nexport AWS_PROFILE=\"acme-dev\"\nawspick_sync() {\n  local f=\"$HOME/.config/awspick/profile\"\n  if [ -f \"$f\" ]; then\n    export AWS_PROFILE=\"$(cat \"$f\")\"\n  fi\n}\nprecmd_functions+=(awspick_sync)\n"
+  },
+  {
+   "path": ".zshrc.bak-20261106231040",
+   "type": "file",
+   "mode": "644",
+   "content": "export AWS_PAGER=\"\"\nexport AWS_PROFILE=\"company\"\nawspick_sync() {\n  local f=\"$HOME/.config/awspick/profile\"\n  if [ -f \"$f\" ]; then\n    export AWS_PROFILE=\"$(cat \"$f\")\"\n  fi\n}\nprecmd_functions+=(awspick_sync)\n"
+  }
+ ]
+}

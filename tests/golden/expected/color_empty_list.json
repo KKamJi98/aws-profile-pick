@@ -1,0 +1,28 @@
+{
+ "runs": [
+  {
+   "stdout": "",
+   "stderr": "INFO: Found 8 AWS profiles\nINFO: Detected shell from SHELL env var: zsh\nINFO: Using zsh configuration at <HOME>/.zshrc\n\u001b[1;31mNo AWS profiles found in ~\u001b[0m\u001b[1;31m/.aws/\u001b[0m\u001b[1;31mconfig\u001b[0m\nEnter profile number or name: INFO: User cancelled profile selection\nINFO: No profile selected, exiting\n",
+   "exit": 1
+  }
+ ],
+ "files": [
+  {
+   "path": ".aws",
+   "type": "dir",
+   "mode": "755"
+  },
+  {
+   "path": ".aws/config",
+   "type": "file",
+   "mode": "644",
+   "content": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n"
+  },
+  {
+   "path": ".zshrc",
+   "type": "file",
+   "mode": "644",
+   "content": ""
+  }
+ ]
+}

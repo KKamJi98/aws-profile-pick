@@ -1,0 +1,28 @@
+{
+ "runs": [
+  {
+   "stdout": "",
+   "stderr": "INFO: Found 8 AWS profiles\nERROR: An unexpected error occurred: missing ), unterminated subpattern at position 0\nTraceback (most recent call last):\n  File \"/Users/ethan/.cache/uv/environments-v2/gen-golden-7d1c1b49a82ad550/lib/python3.13/site-packages/awspick/cli.py\", line 184, in main\n    grouped_profiles = get_grouped_profiles(\n        profiles,\n    ...<5 lines>...\n        case_sensitive=case_sensitive,\n    )\n  File \"/Users/ethan/.cache/uv/environments-v2/gen-golden-7d1c1b49a82ad550/lib/python3.13/site-packages/awspick/config.py\", line 188, in get_grouped_profiles\n    filtered = filter_profiles(\n        profiles,\n    ...<3 lines>...\n        case_sensitive=case_sensitive,\n    )\n  File \"/Users/ethan/.cache/uv/environments-v2/gen-golden-7d1c1b49a82ad550/lib/python3.13/site-packages/awspick/config.py\", line 154, in filter_profiles\n    p for p in result if _match_any(p, include, regex=regex, case_sensitive=case_sensitive)\n                         ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/ethan/.cache/uv/environments-v2/gen-golden-7d1c1b49a82ad550/lib/python3.13/site-packages/awspick/config.py\", line 118, in _match_any\n    return any(_re.search(p, text, flags=flags) is not None for p in patterns)\n  File \"/Users/ethan/.cache/uv/environments-v2/gen-golden-7d1c1b49a82ad550/lib/python3.13/site-packages/awspick/config.py\", line 118, in <genexpr>\n    return any(_re.search(p, text, flags=flags) is not None for p in patterns)\n               ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/ethan/.local/share/uv/python/cpython-3.13-macos-aarch64-none/lib/python3.13/re/__init__.py\", line 177, in search\n    return _compile(pattern, flags).search(string)\n           ~~~~~~~~^^^^^^^^^^^^^^^^\n  File \"/Users/ethan/.local/share/uv/python/cpython-3.13-macos-aarch64-none/lib/python3.13/re/__init__.py\", line 350, in _compile\n    p = _compiler.compile(pattern, flags)\n  File \"/Users/ethan/.local/share/uv/python/cpython-3.13-macos-aarch64-none/lib/python3.13/re/_compiler.py\", line 748, in compile\n    p = _parser.parse(p, flags)\n  File \"/Users/ethan/.local/share/uv/python/cpython-3.13-macos-aarch64-none/lib/python3.13/re/_parser.py\", line 980, in parse\n    p = _parse_sub(source, state, flags & SRE_FLAG_VERBOSE, 0)\n  File \"/Users/ethan/.local/share/uv/python/cpython-3.13-macos-aarch64-none/lib/python3.13/re/_parser.py\", line 459, in _parse_sub\n    itemsappend(_parse(source, state, verbose, nested + 1,\n                ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n                       not nested and not items))\n                       ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/ethan/.local/share/uv/python/cpython-3.13-macos-aarch64-none/lib/python3.13/re/_parser.py\", line 865, in _parse\n    raise source.error(\"missing ), unterminated subpattern\",\n                       source.tell() - start)\nre.PatternError: missing ), unterminated subpattern at position 0\n",
+   "exit": 1
+  }
+ ],
+ "files": [
+  {
+   "path": ".aws",
+   "type": "dir",
+   "mode": "755"
+  },
+  {
+   "path": ".aws/config",
+   "type": "file",
+   "mode": "644",
+   "content": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n"
+  },
+  {
+   "path": ".zshrc",
+   "type": "file",
+   "mode": "644",
+   "content": ""
+  }
+ ]
+}

@@ -1,0 +1,50 @@
+{
+ "runs": [
+  {
+   "stdout": "export AWS_PROFILE=\"team12-dev\"\n",
+   "stderr": "INFO: Found 12 AWS profiles\nINFO: Detected shell from SHELL env var: zsh\nINFO: Using zsh configuration at <HOME>/.zshrc\n             AWS Profiles             \n┏━━━━━┳━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━┓\n┃ No. ┃ Profile    ┃ Group ┃ Current ┃\n┡━━━━━╇━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━┩\n│   1 │ team01-dev │ dev   │         │\n│   2 │ team02-dev │ dev   │         │\n│   3 │ team03-dev │ dev   │         │\n│   4 │ team04-dev │ dev   │         │\n│   5 │ team05-dev │ dev   │         │\n│   6 │ team06-dev │ dev   │         │\n│   7 │ team07-dev │ dev   │         │\n│   8 │ team08-dev │ dev   │         │\n│   9 │ team09-dev │ dev   │         │\n│  10 │ team10-dev │ dev   │         │\n│  11 │ team11-dev │ dev   │         │\n│  12 │ team12-dev │ dev   │         │\n└─────┴────────────┴───────┴─────────┘\nEnter profile number or name: Selected profile: team12-dev\nINFO: Detected shell from SHELL env var: zsh\nINFO: Using zsh configuration at <HOME>/.zshrc\nINFO: Using zsh configuration at <HOME>/.zshrc\nINFO: Backup created at <HOME>/.zshrc.bak-20261106231045\nINFO: Adding new AWS_PROFILE=team12-dev entry\nINFO: Successfully updated <HOME>/.zshrc with AWS_PROFILE=team12-dev\nBackup created at <HOME>/.zshrc.bak-20261106231045\nUpdated <HOME>/.zshrc with AWS_PROFILE=team12-dev\nINFO: Wrote shared profile to <HOME>/.config/awspick/profile\nUpdated shared profile at <HOME>/.config/awspick/profile\nINFO: Using zsh configuration at <HOME>/.zshrc\nRun 'eval \"$(awspick)\"' to apply in the current shell\n",
+   "exit": 0
+  }
+ ],
+ "files": [
+  {
+   "path": ".aws",
+   "type": "dir",
+   "mode": "755"
+  },
+  {
+   "path": ".aws/config",
+   "type": "file",
+   "mode": "644",
+   "content": "[profile team01-dev]\n[profile team02-dev]\n[profile team03-dev]\n[profile team04-dev]\n[profile team05-dev]\n[profile team06-dev]\n[profile team07-dev]\n[profile team08-dev]\n[profile team09-dev]\n[profile team10-dev]\n[profile team11-dev]\n[profile team12-dev]\n"
+  },
+  {
+   "path": ".config",
+   "type": "dir",
+   "mode": "755"
+  },
+  {
+   "path": ".config/awspick",
+   "type": "dir",
+   "mode": "755"
+  },
+  {
+   "path": ".config/awspick/profile",
+   "type": "file",
+   "mode": "644",
+   "content": "team12-dev\n"
+  },
+  {
+   "path": ".zshrc",
+   "type": "file",
+   "mode": "644",
+   "content": "\n\n# Added by AWS Pick\nexport AWS_PROFILE=\"team12-dev\"\n"
+  },
+  {
+   "path": ".zshrc.bak-20261106231045",
+   "type": "file",
+   "mode": "644",
+   "content": ""
+  }
+ ]
+}

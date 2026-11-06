@@ -1,0 +1,50 @@
+{
+ "runs": [
+  {
+   "stdout": "export AWS_PROFILE=\"acme-prod\"\n",
+   "stderr": "INFO: Found 8 AWS profiles\nINFO: Detected shell from SHELL env var: nu\nWARNING: Shell 'nu' not recognized, falling back to bash\n                AWS Profiles                \n┏━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━┓\n┃ No. ┃ Profile         ┃ Group  ┃ Current ┃\n┡━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━┩\n│   1 │ acme-prod       │ prod   │         │\n│   2 │ acme-prod-admin │ prod   │         │\n├─────┼─────────────────┼────────┼─────────┤\n│   3 │ acme-stg        │ stg    │         │\n│   4 │ acme-stg-admin  │ stg    │         │\n├─────┼─────────────────┼────────┼─────────┤\n│   5 │ acme-dev        │ dev    │         │\n│   6 │ acme-dev-admin  │ dev    │         │\n├─────┼─────────────────┼────────┼─────────┤\n│   7 │ default         │ others │         │\n│   8 │ sandbox         │ others │         │\n└─────┴─────────────────┴────────┴─────────┘\nEnter profile number or name: Selected profile: acme-prod\nINFO: Detected shell from SHELL env var: nu\nWARNING: Shell 'nu' not recognized, falling back to bash\nWARNING: Shell 'nu' not recognized, falling back to bash\nINFO: Backup created at <HOME>/.bashrc.bak-20261106231042\nINFO: Adding new AWS_PROFILE=acme-prod entry\nINFO: Successfully updated <HOME>/.bashrc with AWS_PROFILE=acme-prod\nBackup created at <HOME>/.bashrc.bak-20261106231042\nUpdated <HOME>/.bashrc with AWS_PROFILE=acme-prod\nINFO: Wrote shared profile to <HOME>/.config/awspick/profile\nUpdated shared profile at <HOME>/.config/awspick/profile\nWARNING: Shell 'nu' not recognized, falling back to bash\nRun 'eval \"$(awspick)\"' to apply in the current shell\n",
+   "exit": 0
+  }
+ ],
+ "files": [
+  {
+   "path": ".aws",
+   "type": "dir",
+   "mode": "755"
+  },
+  {
+   "path": ".aws/config",
+   "type": "file",
+   "mode": "644",
+   "content": "[default]\nregion = ap-northeast-2\n\n[profile acme-prod]\n[profile acme-prod-admin]\n[profile acme-stg]\n[profile acme-stg-admin]\n[profile acme-dev]\n[profile acme-dev-admin]\n[profile sandbox]\n[sso-session corp]\nsso_region = us-east-1\n"
+  },
+  {
+   "path": ".bashrc",
+   "type": "file",
+   "mode": "644",
+   "content": "\n\n# Added by AWS Pick\nexport AWS_PROFILE=\"acme-prod\"\n"
+  },
+  {
+   "path": ".bashrc.bak-20261106231042",
+   "type": "file",
+   "mode": "644",
+   "content": ""
+  },
+  {
+   "path": ".config",
+   "type": "dir",
+   "mode": "755"
+  },
+  {
+   "path": ".config/awspick",
+   "type": "dir",
+   "mode": "755"
+  },
+  {
+   "path": ".config/awspick/profile",
+   "type": "file",
+   "mode": "644",
+   "content": "acme-prod\n"
+  }
+ ]
+}

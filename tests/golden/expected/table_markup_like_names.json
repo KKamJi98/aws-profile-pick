@@ -1,0 +1,28 @@
+{
+ "runs": [
+  {
+   "stdout": "",
+   "stderr": "INFO: Found 4 AWS profiles\nINFO: Detected shell from SHELL env var: zsh\nINFO: Using zsh configuration at <HOME>/.zshrc\nERROR: An unexpected error occurred: closing tag '[/b]' at position 1 doesn't match any open tag\nTraceback (most recent call last):\n  File \"/Users/ethan/.cache/uv/environments-v2/gen-golden-7d1c1b49a82ad550/lib/python3.13/site-packages/awspick/cli.py\", line 194, in main\n    display_profiles(grouped_profiles, current_profile=current_profile)\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/ethan/.cache/uv/environments-v2/gen-golden-7d1c1b49a82ad550/lib/python3.13/site-packages/awspick/config.py\", line 281, in display_profiles\n    console.print(table)\n    ~~~~~~~~~~~~~^^^^^^^\n  File \"/Users/ethan/.cache/uv/environments-v2/gen-golden-7d1c1b49a82ad550/lib/python3.13/site-packages/rich/console.py\", line 1705, in print\n    extend(render(renderable, render_options))\n    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/ethan/.cache/uv/environments-v2/gen-golden-7d1c1b49a82ad550/lib/python3.13/site-packages/rich/console.py\", line 1326, in render\n    for render_output in iter_render:\n                         ^^^^^^^^^^^\n  File \"/Users/ethan/.cache/uv/environments-v2/gen-golden-7d1c1b49a82ad550/lib/python3.13/site-packages/rich/table.py\", line 488, in __rich_console__\n    widths = self._calculate_column_widths(\n        console, options.update_width(max_width - extra_width)\n    )\n  File \"/Users/ethan/.cache/uv/environments-v2/gen-golden-7d1c1b49a82ad550/lib/python3.13/site-packages/rich/table.py\", line 530, in _calculate_column_widths\n    self._measure_column(console, options, column) for column in columns\n    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/ethan/.cache/uv/environments-v2/gen-golden-7d1c1b49a82ad550/lib/python3.13/site-packages/rich/table.py\", line 733, in _measure_column\n    _min, _max = get_render_width(console, options, cell.renderable)\n                 ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/ethan/.cache/uv/environments-v2/gen-golden-7d1c1b49a82ad550/lib/python3.13/site-packages/rich/measure.py\", line 109, in get\n    get_console_width(console, options)\n    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^\n  File \"/Users/ethan/.cache/uv/environments-v2/gen-golden-7d1c1b49a82ad550/lib/python3.13/site-packages/rich/padding.py\", line 132, in __rich_measure__\n    measure_min, measure_max = Measurement.get(console, options, self.renderable)\n                               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/ethan/.cache/uv/environments-v2/gen-golden-7d1c1b49a82ad550/lib/python3.13/site-packages/rich/measure.py\", line 99, in get\n    renderable = console.render_str(\n        renderable, markup=options.markup, highlight=False\n    )\n  File \"/Users/ethan/.cache/uv/environments-v2/gen-golden-7d1c1b49a82ad550/lib/python3.13/site-packages/rich/console.py\", line 1429, in render_str\n    rich_text = render_markup(\n        text,\n    ...<2 lines>...\n        emoji_variant=self._emoji_variant,\n    )\n  File \"/Users/ethan/.cache/uv/environments-v2/gen-golden-7d1c1b49a82ad550/lib/python3.13/site-packages/rich/markup.py\", line 167, in render\n    raise MarkupError(\n        f\"closing tag '{tag.markup}' at position {position} doesn't match any open tag\"\n    ) from None\nrich.errors.MarkupError: closing tag '[/b]' at position 1 doesn't match any open tag\n",
+   "exit": 1
+  }
+ ],
+ "files": [
+  {
+   "path": ".aws",
+   "type": "dir",
+   "mode": "755"
+  },
+  {
+   "path": ".aws/config",
+   "type": "file",
+   "mode": "644",
+   "content": "[profile team[red]x]\n[profile a[/b]]\n[profile a[b]]\n[profile ok]\n"
+  },
+  {
+   "path": ".zshrc",
+   "type": "file",
+   "mode": "644",
+   "content": ""
+  }
+ ]
+}
