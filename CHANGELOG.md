@@ -1,4 +1,15 @@
 # Changelog
+## [3.0.0](https://github.com/KKamJi98/aws-profile-pick/compare/v2.0.2...v3.0.0) (2026-11-06)
+
+
+### ⚠ BREAKING CHANGES
+
+* awspick is distributed through Homebrew (KKamJi98/tap/awspick), crates.io and GitHub Releases instead of PyPI, and INFO: log lines are printed only with -v/--verbose.
+
+### Features
+
+* rewrite awspick in Rust ([2834b6d](https://github.com/KKamJi98/aws-profile-pick/commit/2834b6d60ff88ba779bafa49c3cddcaf3efa7eb1))
+
 ## [2.0.2](https://github.com/KKamJi98/aws-profile-pick/compare/v2.0.1...v2.0.2) (2026-08-16)
 
 
