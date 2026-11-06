@@ -234,7 +234,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     # Tag-only environment, as for crates-io. Moving HOMEBREW_TAP_DEPLOY_KEY
-    # from a repository secret to a `release` environment secret would limit
+    # from a repository secret to a `release` environment secret limits
     # it to these jobs.
     environment: release
     permissions:
@@ -279,11 +279,11 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           mkdir -p Formula
           cp "${RUNNER_TEMP}/awspick.rb" Formula/awspick.rb
-          if [[ -z "$(git status --porcelain)" ]]; then
+          if [[ -z "$(git status --porcelain --untracked-files=all)" ]]; then
             echo "Formula/awspick.rb already up to date"
             exit 0
           fi
-          changed="$(git status --porcelain | awk '{print $2}')"
+          changed="$(git status --porcelain --untracked-files=all | awk '{print $2}')"
           if [[ "${changed}" != "Formula/awspick.rb" ]]; then
             echo "refusing to commit unexpected changes: ${changed}" >&2
             exit 1
