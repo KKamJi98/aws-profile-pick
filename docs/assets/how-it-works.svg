@@ -1,68 +1,76 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="915" viewBox="0 0 1100 915" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="960" viewBox="0 0 1100 960" role="img" aria-labelledby="title desc">
   <title id="title">How awspick reads profiles and applies a selection</title>
   <desc id="desc">AWS config and credentials section names enter a grouped, filterable table. A selected profile updates the shell rc file and shared profile file, and produces an export or set command on stdout. A shell wrapper evaluates that command to update the current shell. There are no AWS API calls.</desc>
   <defs>
     <marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0 L9 4.5 L0 9Z" fill="#64748b"/></marker>
   </defs>
-  <rect width="1100" height="915" rx="18" fill="#fff"/>
+  <rect width="1100" height="960" rx="18" fill="#fff"/>
   <g font-family="Arial, Helvetica, sans-serif" fill="#0f172a">
     <text x="34" y="48" font-size="27" font-weight="700">One selection. Three local outputs.</text>
     <text x="34" y="79" font-size="17" fill="#475569">Profile names stay local. awspick never calls an AWS API.</text>
 
-    <g stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrow)">
-      <line x1="550" y1="220" x2="550" y2="280"/>
-      <line x1="550" y1="390" x2="550" y2="450"/>
-      <line x1="194" y1="560" x2="194" y2="640"/>
-      <line x1="550" y1="560" x2="550" y2="640"/>
-      <line x1="906" y1="560" x2="906" y2="640"/>
+    <g id="connectors" stroke="#64748b" stroke-width="2" fill="none">
+      <g id="profile-merge">
+        <line x1="283" y1="245" x2="283" y2="285"/>
+        <line x1="817" y1="245" x2="817" y2="285"/>
+        <path d="M283 285 H817 M550 285 V325" marker-end="url(#arrow)"/>
+      </g>
+      <line id="profile-selection" x1="550" y1="435" x2="550" y2="495" marker-end="url(#arrow)"/>
+      <g id="selection-branches">
+        <path d="M550 605 V645 M194 645 H906"/>
+        <line x1="194" y1="645" x2="194" y2="685" marker-end="url(#arrow)"/>
+        <line x1="550" y1="645" x2="550" y2="685" marker-end="url(#arrow)"/>
+        <line x1="906" y1="645" x2="906" y2="685" marker-end="url(#arrow)"/>
+      </g>
     </g>
     <g font-size="15" fill="#475569">
-      <text x="568" y="255">names</text>
-      <text x="568" y="425">number or name</text>
-      <text x="208" y="605">rc assignment</text>
-      <text x="564" y="605">selected name</text>
-      <text x="920" y="605">export / set</text>
+      <text x="568" y="310">names</text>
+      <text x="568" y="470">number or name</text>
+      <text x="208" y="670">rc assignment</text>
+      <text x="564" y="670">selected name</text>
+      <text x="920" y="670">export / set</text>
     </g>
 
-    <rect x="34" y="110" width="1032" height="110" rx="12" fill="#f8fafc" stroke="#cbd5e1"/>
-    <text x="56" y="146" font-size="18" font-weight="700">Read existing profiles</text>
-    <text x="56" y="180" font-size="17">~/.aws/config</text>
-    <text x="390" y="180" font-size="17">~/.aws/credentials</text>
-    <text x="750" y="180" font-size="15" fill="#475569">Section names, not credentials</text>
+    <text x="34" y="124" font-size="18" font-weight="700">Read existing profiles</text>
+    <text x="750" y="124" font-size="15" fill="#475569">Section names, not credentials</text>
+    <rect id="config-source" x="34" y="145" width="498" height="100" rx="12" fill="#f8fafc" stroke="#cbd5e1"/>
+    <text x="283" y="201" font-size="17" text-anchor="middle">~/.aws/config</text>
+    <rect id="credentials-source" x="568" y="145" width="498" height="100" rx="12" fill="#f8fafc" stroke="#cbd5e1"/>
+    <text x="817" y="201" font-size="17" text-anchor="middle">~/.aws/credentials</text>
 
-    <rect x="34" y="280" width="1032" height="110" rx="12" fill="#eff6ff" stroke="#93c5fd"/>
-    <text x="56" y="316" font-size="18" font-weight="700" fill="#1d4ed8">Group and filter</text>
-    <text x="56" y="350" font-size="17">prod / stg / dev / preprod</text>
-    <text x="390" y="350" font-size="17">Substring or regex filters</text>
-    <text x="750" y="350" font-size="15" fill="#475569">Custom rules and order supported</text>
+    <rect id="profile-groups" x="34" y="325" width="1032" height="110" rx="12" fill="#eff6ff" stroke="#93c5fd"/>
+    <text x="56" y="361" font-size="18" font-weight="700" fill="#1d4ed8">Group and filter</text>
+    <text x="56" y="395" font-size="17">prod / stg / dev / preprod</text>
+    <text x="390" y="395" font-size="17">Substring or regex filters</text>
+    <text x="750" y="395" font-size="15" fill="#475569">Custom rules and order supported</text>
 
-    <rect x="34" y="450" width="1032" height="110" rx="12" fill="#eff6ff" stroke="#93c5fd"/>
-    <text x="56" y="486" font-size="18" font-weight="700" fill="#1d4ed8">Choose a profile</text>
-    <text x="56" y="520" font-size="17">acme-prod-readonly</text>
-    <text x="390" y="520" font-size="17">Table + prompt on stderr</text>
-    <text x="750" y="520" font-size="15" fill="#475569">Or pass PROFILE to skip the table</text>
+    <rect id="profile-choice" x="34" y="495" width="1032" height="110" rx="12" fill="#eff6ff" stroke="#93c5fd"/>
+    <text x="56" y="531" font-size="18" font-weight="700" fill="#1d4ed8">Choose a profile</text>
+    <text x="56" y="565" font-size="17">acme-prod-readonly</text>
+    <text x="390" y="565" font-size="17">Table + prompt on stderr</text>
+    <text x="750" y="565" font-size="15" fill="#475569">Or pass PROFILE to skip the table</text>
 
-    <rect x="34" y="640" width="320" height="190" rx="12" fill="#fffbeb" stroke="#fcd34d"/>
-    <text x="56" y="674" font-size="18" font-weight="700" fill="#92400e">1. Persist the default</text>
-    <text x="56" y="710" font-size="17">Shell rc file is modified</text>
-    <text x="56" y="741" font-size="16" fill="#475569">.bashrc / .zshrc / config.fish</text>
-    <text x="56" y="772" font-size="16" fill="#475569">Backup beside rc before editing</text>
-    <text x="56" y="803" font-size="16" fill="#475569">Keep 2 awspick-named backups</text>
+    <rect id="rc-output" x="34" y="685" width="320" height="190" rx="12" fill="#fffbeb" stroke="#fcd34d"/>
+    <text x="56" y="719" font-size="18" font-weight="700" fill="#92400e">1. Persist the default</text>
+    <text x="56" y="755" font-size="17">Shell rc file is modified</text>
+    <text x="56" y="786" font-size="16" fill="#475569">.bashrc / .zshrc / config.fish</text>
+    <text x="56" y="817" font-size="16" fill="#475569">Backup beside rc before editing</text>
+    <text x="56" y="848" font-size="16" fill="#475569">Keep 2 awspick-named backups</text>
 
-    <rect x="390" y="640" width="320" height="190" rx="12" fill="#f0fdf4" stroke="#86efac"/>
-    <text x="412" y="674" font-size="18" font-weight="700" fill="#166534">2. Share the selection</text>
-    <text x="412" y="710" font-size="17">~/.config/awspick/profile</text>
-    <text x="412" y="741" font-size="16" fill="#475569">Contains just the profile name</text>
-    <text x="412" y="772" font-size="16" fill="#475569">Optional prompt hooks read it</text>
-    <text x="412" y="803" font-size="16" fill="#475569">Other tabs sync on their next prompt</text>
+    <rect id="shared-output" x="390" y="685" width="320" height="190" rx="12" fill="#f0fdf4" stroke="#86efac"/>
+    <text x="412" y="719" font-size="18" font-weight="700" fill="#166534">2. Share the selection</text>
+    <text x="412" y="755" font-size="17">~/.config/awspick/profile</text>
+    <text x="412" y="786" font-size="16" fill="#475569">Contains just the profile name</text>
+    <text x="412" y="817" font-size="16" fill="#475569">Optional prompt hooks read it</text>
+    <text x="412" y="848" font-size="16" fill="#475569">Other tabs sync on their next prompt</text>
 
-    <rect x="746" y="640" width="320" height="190" rx="12" fill="#eff6ff" stroke="#93c5fd"/>
-    <text x="768" y="674" font-size="18" font-weight="700" fill="#1d4ed8">3. Update this shell</text>
-    <text x="768" y="710" font-size="17">Shell command on stdout</text>
-    <text x="768" y="741" font-size="16" fill="#475569">ap wrapper evaluates the command</text>
-    <text x="768" y="772" font-size="16" fill="#475569">AWS_PROFILE changes immediately</text>
-    <text x="768" y="803" font-size="16" fill="#475569">awspick alone cannot change its parent</text>
+    <rect id="shell-output" x="746" y="685" width="320" height="190" rx="12" fill="#eff6ff" stroke="#93c5fd"/>
+    <text x="768" y="719" font-size="18" font-weight="700" fill="#1d4ed8">3. Update this shell</text>
+    <text x="768" y="755" font-size="17">Shell command on stdout</text>
+    <text x="768" y="786" font-size="16" fill="#475569">ap wrapper evaluates the command</text>
+    <text x="768" y="817" font-size="16" fill="#475569">AWS_PROFILE changes immediately</text>
+    <text x="768" y="848" font-size="16" fill="#475569">awspick alone cannot change its parent</text>
 
-    <text x="34" y="880" font-size="16" fill="#475569">No SSO login. No credential validation. No AWS config or credentials file edits.</text>
+    <text x="34" y="925" font-size="16" fill="#475569">No SSO login. No credential validation. No AWS config or credentials file edits.</text>
   </g>
 </svg>
