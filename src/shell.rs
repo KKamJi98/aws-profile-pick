@@ -309,7 +309,7 @@ pub fn write_shared_profile(home: &Path, profile: &str) -> Result<PathBuf, Strin
 
 /// Local time as `YYYYmmddHHMMSS`, the 2.x backup suffix.
 fn timestamp() -> String {
-    chrono::Local::now().format("%Y%m%d%H%M%S").to_string()
+    jiff::Zoned::now().strftime("%Y%m%d%H%M%S").to_string()
 }
 
 /// `shutil.copy2` into a new file: follow symlinks, copy the bytes, then the
